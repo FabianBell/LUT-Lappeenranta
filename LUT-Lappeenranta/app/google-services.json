@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "490526942796",
+    "firebase_url": "https://lut-lappeenranta.firebaseio.com",
+    "project_id": "lut-lappeenranta",
+    "storage_bucket": "lut-lappeenranta.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:490526942796:android:7e7eba2c67260fda",
+        "android_client_info": {
+          "package_name": "com.fabianbell.janinakeller.lut_lappeenranta"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "490526942796-fndjs17rlql1slmrpdlvgd7q3qtvgbhb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.fabianbell.janinakeller.lut_lappeenranta",
+            "certificate_hash": "7b4f18609852edaf55cf84e829d15241cb28b863"
+          }
+        },
+        {
+          "client_id": "490526942796-0oejr7pvns74fgel41bv1lb408aq1s9n.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.fabianbell.janinakeller.lut_lappeenranta",
+            "certificate_hash": "31c24ca91ba2491a8c59d090ec8c7e50b669452d"
+          }
+        },
+        {
+          "client_id": "490526942796-ha9okdulvvtvh38l933hprotrqu8f5is.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCrTmCSZOLua8X8H-tiqik7bmOG0_08VxY"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "490526942796-ha9okdulvvtvh38l933hprotrqu8f5is.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
