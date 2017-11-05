@@ -1,11 +1,25 @@
 package com.fabianbell.janinakeller.lut_lappeenranta;
 
+import android.*;
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.Environment;
+import android.os.FileObserver;
+import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.FileProvider;
+import android.support.v4.content.PermissionChecker;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
+import android.webkit.PermissionRequest;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -14,6 +28,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.MultiAutoCompleteTextView;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
@@ -22,7 +37,18 @@ import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.URI;
+import java.security.Permission;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Map;
 
 public class AddDevice extends AppCompatActivity {
@@ -53,6 +79,9 @@ public class AddDevice extends AppCompatActivity {
 
     //test Data
     private Map<String, String> testBrands;
+
+    //Permission
+    static final int PERMISSION_REQUEST_CODE_CAMERA = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,6 +158,19 @@ public class AddDevice extends AppCompatActivity {
                 Log.d("Device", "Device saved");
 
                 startActivity(new Intent(AddDevice.this, Main.class));
+            }
+        });
+
+        mAddReceipt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //check for permission
+                if(PermissionChecker.checkSelfPermission(AddDevice.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
+                    ActivityCompat.requestPermissions(AddDevice.this, new String[]{Manifest.permission.CAMERA}, PERMISSION_REQUEST_CODE_CAMERA);
+                }else{
+                    Log.d("Receipt", "Add Reciept");
+                    takePicture();
+                }
             }
         });
 
@@ -247,6 +289,63 @@ public class AddDevice extends AppCompatActivity {
                 });
             }
         });
+    }
+
+    static final int REQUEST_IMAGE_CAPTURE = 1;
+
+    private void takePicture() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            File imageFile = null;
+            try{
+                imageFile = createImageFile();
+            }catch (IOException e){
+                Log.d("Receipt", "Cannot create image file");
+            }
+            if (imageFile != null) {
+
+                URI imageUri = imageFile.toURI(); //FileProvider.getUriForFile(this, "com.fabianbell.janinakeller.lut_lappeenranta.android.fileprovider", imageFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+            }
+        }
+    }
+
+    private String imagePath;
+
+    private File createImageFile() throws IOException{
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getCacheDir();
+        File image = File.createTempFile(imageFileName,".jpg", storageDir);
+        imagePath = image.getAbsolutePath();
+        return image;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSION_REQUEST_CODE_CAMERA) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Log.d("Receipt", "Add Reciept");
+                takePicture();
+            }
+            else {
+                Toast.makeText(AddDevice.this, "Without the permission you can not upload a picture", Toast.LENGTH_LONG);
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        //display picture
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            Log.d("Receipt", "Took Picture");
+            Bundle extras = data.getExtras();
+            Bitmap imageBitmap = (Bitmap) extras.get("data");
+            mReceipt.setImageBitmap(imageBitmap);
+            //Todo improve quality
+        }
     }
 
     private void createTestData(final Firebase mRootRef){
