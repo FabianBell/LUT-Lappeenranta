@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.FileObserver;
@@ -105,6 +107,11 @@ public class AddDevice extends AppCompatActivity {
 
         mRootRef = new Firebase("https://lut-lappeenranta.firebaseio.com/");
         mAuth = FirebaseAuth.getInstance();
+
+        if (savedInstanceState != null) {
+            imagePath = savedInstanceState.getString("IMAGE_PATH");
+            displayImage();
+        }
 
         //createTestData(mRootRef);
 
@@ -291,6 +298,12 @@ public class AddDevice extends AppCompatActivity {
         });
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState){
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putString("IMAGE_PATH", imagePath);
+    }
+
     static final int REQUEST_IMAGE_CAPTURE = 1;
 
     private void takePicture() {
@@ -304,7 +317,7 @@ public class AddDevice extends AppCompatActivity {
             }
             if (imageFile != null) {
 
-                URI imageUri = imageFile.toURI(); //FileProvider.getUriForFile(this, "com.fabianbell.janinakeller.lut_lappeenranta.android.fileprovider", imageFile);
+                Uri imageUri = FileProvider.getUriForFile(this,"com.fabianbell.janinakeller.lut_lappeenranta.fileprovider", imageFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
                 startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
             }
@@ -316,7 +329,7 @@ public class AddDevice extends AppCompatActivity {
     private File createImageFile() throws IOException{
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = getCacheDir();
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File image = File.createTempFile(imageFileName,".jpg", storageDir);
         imagePath = image.getAbsolutePath();
         return image;
@@ -341,10 +354,66 @@ public class AddDevice extends AppCompatActivity {
         //display picture
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             Log.d("Receipt", "Took Picture");
-            Bundle extras = data.getExtras();
-            Bitmap imageBitmap = (Bitmap) extras.get("data");
-            mReceipt.setImageBitmap(imageBitmap);
-            //Todo improve quality
+            displayImage();
+        }
+    }
+
+    private void displayImage(){
+        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+        bmOptions.inSampleSize= 4;
+        Bitmap imageBitmap = BitmapFactory.decodeFile(imagePath, bmOptions);
+        ExifInterface exif = null;
+        try {
+            exif = new ExifInterface(imagePath);
+            int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
+            imageBitmap = rotateBitmap(imageBitmap, orientation);
+        } catch (IOException e) {
+            Log.d("Receipt", "Cannot find image file");
+        }
+        mReceipt.setImageBitmap(imageBitmap);
+    }
+
+    public static Bitmap rotateBitmap(Bitmap bitmap, int orientation) {
+
+        Matrix matrix = new Matrix();
+        switch (orientation) {
+            case ExifInterface.ORIENTATION_NORMAL:
+                return bitmap;
+            case ExifInterface.ORIENTATION_FLIP_HORIZONTAL:
+                matrix.setScale(-1, 1);
+                break;
+            case ExifInterface.ORIENTATION_ROTATE_180:
+                matrix.setRotate(180);
+                break;
+            case ExifInterface.ORIENTATION_FLIP_VERTICAL:
+                matrix.setRotate(180);
+                matrix.postScale(-1, 1);
+                break;
+            case ExifInterface.ORIENTATION_TRANSPOSE:
+                matrix.setRotate(90);
+                matrix.postScale(-1, 1);
+                break;
+            case ExifInterface.ORIENTATION_ROTATE_90:
+                matrix.setRotate(90);
+                break;
+            case ExifInterface.ORIENTATION_TRANSVERSE:
+                matrix.setRotate(-90);
+                matrix.postScale(-1, 1);
+                break;
+            case ExifInterface.ORIENTATION_ROTATE_270:
+                matrix.setRotate(-90);
+                break;
+            default:
+                return bitmap;
+        }
+        try {
+            Bitmap bmRotated = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+            bitmap.recycle();
+            return bmRotated;
+        }
+        catch (OutOfMemoryError e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
