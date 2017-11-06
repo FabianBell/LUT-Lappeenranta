@@ -29,6 +29,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.MultiAutoCompleteTextView;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -37,7 +38,13 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -57,6 +64,9 @@ public class AddDevice extends AppCompatActivity {
 
     private Firebase mRootRef;
     private FirebaseAuth mAuth;
+    private FirebaseStorage storage;
+    private StorageReference storageReference;
+    private UploadTask uploadTask;
 
     //fields
     private Spinner mDeviceCategory;
@@ -72,6 +82,8 @@ public class AddDevice extends AppCompatActivity {
 
     private Button mAddReceipt;
     private Button mAddDeviceButton;
+
+    private ProgressBar mUploadBar;
 
     //autocomplete
     private ArrayList<String> brands;
@@ -105,8 +117,12 @@ public class AddDevice extends AppCompatActivity {
         mAddReceipt = (Button) findViewById(R.id.addReceipt);
         mAddDeviceButton = (Button) findViewById(R.id.addDeviceButton);
 
+        mUploadBar = (ProgressBar) findViewById(R.id.uploadBar);
+
         mRootRef = new Firebase("https://lut-lappeenranta.firebaseio.com/");
         mAuth = FirebaseAuth.getInstance();
+        storage = FirebaseStorage.getInstance();
+        storageReference = storage.getReference().child("User_receipt");
 
         if (savedInstanceState != null) {
             imagePath = savedInstanceState.getString("IMAGE_PATH");
@@ -152,7 +168,7 @@ public class AddDevice extends AppCompatActivity {
                 String shop = mDeviceShop.getText().toString();
                 String date = mDeviceDateOfPurchase.getText().toString();
                 String condition = mDeviceCondition.getSelectedItem().toString();
-
+                
                 Firebase deviceByNumber = mRootRef.child("User").child(mAuth.getCurrentUser().getUid()).child("Devices").child(deviceNumber);
                 Log.d("Device", "Start saving Device with Number: " + deviceNumber);
                 deviceByNumber.child("category").setValue(category);
@@ -162,9 +178,41 @@ public class AddDevice extends AppCompatActivity {
                 deviceByNumber.child("shop").setValue(shop);
                 deviceByNumber.child("date").setValue(date);
                 deviceByNumber.child("condition").setValue(condition);
-                Log.d("Device", "Device saved");
+                Log.d("AddDevice - Device", "Device saved");
 
-                startActivity(new Intent(AddDevice.this, Main.class));
+                //upload receipt
+                if (imagePath != null) {
+                    StorageReference imageRef = storageReference.child(mAuth.getCurrentUser().getUid() + ".jpg");
+                    File imageFile = new File(imagePath);
+                    Uri imageUri = FileProvider.getUriForFile(AddDevice.this, "com.fabianbell.janinakeller.lut_lappeenranta.fileprovider", imageFile);
+                    uploadTask = imageRef.putFile(imageUri);
+                    uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                            int progress;
+                            if (taskSnapshot.getBytesTransferred() > 0) {
+                                progress = (int) (taskSnapshot.getTotalByteCount() / taskSnapshot.getBytesTransferred() * 100.0f);
+                            }else{
+                                progress = 0;
+                            }
+                            mUploadBar.setProgress(progress);
+                        }
+                    });
+                    uploadTask.addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                            if (task.isSuccessful()){
+                                Log.d("Receipt", "Uploaded");
+                                startActivity(new Intent(AddDevice.this, Main.class));
+                            }else{
+                                Log.d("Receipt", "Cannot upload Image > " + task.getException().getMessage());
+                            }
+                        }
+                    });
+                }else {
+                    Log.d("Receipt", "Upload without Receipt");
+                    startActivity(new Intent(AddDevice.this, Main.class));
+                }
             }
         });
 
@@ -287,6 +335,7 @@ public class AddDevice extends AppCompatActivity {
                             }
                             Log.d("Model", "Models complete: " + modelOfBrand);
                             modelAdapter.notifyDataSetChanged();
+                            //todo bug fix: autocomplete does not show models
                         }
                     }
                     @Override

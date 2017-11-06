@@ -120,6 +120,13 @@
                 app:layout_constraintStart_toStartOf="parent"
                 tools:layout_editor_absoluteY="468dp">
 
+                <ProgressBar
+                    android:id="@+id/uploadBar"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
                 <Button
                     android:id="@+id/addDeviceButton"
                     android:layout_width="match_parent"
