@@ -1137,15 +1137,16 @@ int id transition_transform 0x7f0800eb
 int id uniform 0x7f0800ec
 int id unknown 0x7f0800ed
 int id up 0x7f0800ee
-int id useLogo 0x7f0800ef
-int id userName 0x7f0800f0
-int id usernameField 0x7f0800f1
-int id view_offset_helper 0x7f0800f2
-int id visible 0x7f0800f3
-int id wide 0x7f0800f4
-int id withText 0x7f0800f5
-int id wrap 0x7f0800f6
-int id wrap_content 0x7f0800f7
+int id uploadBar 0x7f0800ef
+int id useLogo 0x7f0800f0
+int id userName 0x7f0800f1
+int id usernameField 0x7f0800f2
+int id view_offset_helper 0x7f0800f3
+int id visible 0x7f0800f4
+int id wide 0x7f0800f5
+int id withText 0x7f0800f6
+int id wrap 0x7f0800f7
+int id wrap_content 0x7f0800f8
 int integer abc_config_activityDefaultDur 0x7f090000
 int integer abc_config_activityShortDur 0x7f090001
 int integer app_bar_elevation_anim_duration 0x7f090002
@@ -2427,3 +2428,4 @@ int styleable com_facebook_login_view_com_facebook_tooltip_mode 3
 int[] styleable com_facebook_profile_picture_view { 0x7f03006b, 0x7f030070 }
 int styleable com_facebook_profile_picture_view_com_facebook_is_cropped 0
 int styleable com_facebook_profile_picture_view_com_facebook_preset_size 1
+int xml file_paths 0x7f100000

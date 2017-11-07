@@ -4064,15 +4064,16 @@ public final class R {
     public static final int uniform=0x7f0800ec;
     public static final int unknown=0x7f0800ed;
     public static final int up=0x7f0800ee;
-    public static final int useLogo=0x7f0800ef;
-    public static final int userName=0x7f0800f0;
-    public static final int usernameField=0x7f0800f1;
-    public static final int view_offset_helper=0x7f0800f2;
-    public static final int visible=0x7f0800f3;
-    public static final int wide=0x7f0800f4;
-    public static final int withText=0x7f0800f5;
-    public static final int wrap=0x7f0800f6;
-    public static final int wrap_content=0x7f0800f7;
+    public static final int uploadBar=0x7f0800ef;
+    public static final int useLogo=0x7f0800f0;
+    public static final int userName=0x7f0800f1;
+    public static final int usernameField=0x7f0800f2;
+    public static final int view_offset_helper=0x7f0800f3;
+    public static final int visible=0x7f0800f4;
+    public static final int wide=0x7f0800f5;
+    public static final int withText=0x7f0800f6;
+    public static final int wrap=0x7f0800f7;
+    public static final int wrap_content=0x7f0800f8;
   }
   public static final class integer {
     public static final int abc_config_activityDefaultDur=0x7f090000;
@@ -15115,5 +15116,8 @@ public final class R {
      * @attr name com.fabianbell.janinakeller.lut_lappeenranta:com_facebook_preset_size
      */
     public static final int com_facebook_profile_picture_view_com_facebook_preset_size=1;
+  }
+  public static final class xml {
+    public static final int file_paths=0x7f100000;
   }
 }
