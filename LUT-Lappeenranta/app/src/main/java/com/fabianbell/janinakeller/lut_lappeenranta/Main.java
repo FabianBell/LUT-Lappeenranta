@@ -25,6 +25,7 @@ public class Main extends AppCompatActivity {
     private Firebase mRootRef;
     private FirebaseAuth mAuth;
 
+
     private TabHost host;
 
     //Profile Elements
@@ -68,12 +69,14 @@ public class Main extends AppCompatActivity {
         editProfileButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(Main.this, Test.class));
+                startActivity(new Intent(Main.this, EditProfile.class));
             }
         });
 
         ////////////////////////////////// Devices /////////////////////////////////////////
         mAddDeviceButton = (FloatingActionButton) findViewById(R.id.addDeviceButton);
+        Integer [] imgid;
+
 
         mAddDeviceButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -81,6 +84,7 @@ public class Main extends AppCompatActivity {
                 startActivity(new Intent(Main.this, AddDevice.class));
             }
         });
+
 
         mDeviceList = findViewById(R.id.deviceList);
 

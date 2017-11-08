@@ -3,4 +3,12 @@
     <string name="action_settings">Settings</string>
     <string name="title_activity_main">Main</string>
     <string name="section_format">Hello World from section: %1$d</string>
+    <string name="model_name">Model Name</string>
+    <string name="brand">Brand</string>
+    <string name="id_number">ID Number</string>
+    <string name="price">Price</string>
+    <string name="shop">Shop</string>
+    <string name="date_of_purchase">Date of Purchase</string>
+    <string name="category">Category</string>
+    <string name="condition">Condition</string>
 </resources>

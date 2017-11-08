@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.fabianbell.janinakeller.lut_lappeenranta.AddDevice">
+    tools:context="com.fabianbell.janinakeller.lut_lappeenranta.EditDevice">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -27,26 +27,25 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent">
 
-                <Spinner
-                    android:id="@+id/deviceCategory"
-                    android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:tooltipText="Condition" />
-
-                <AutoCompleteTextView
-                    android:id="@+id/deviceBrand"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="@string/brand" />
-
-                <AutoCompleteTextView
+                <EditText
                     android:id="@+id/deviceModel"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:hint="@string/model_name" />
+                    android:ems="10"
+                    android:hint="@string/model_name"
+                    android:inputType="text" />
+
+                <EditText
+                    android:id="@+id/deviceBrand"
+                    style="@style/Widget.AppCompat.AutoCompleteTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ems="10"
+                    android:hint="@string/brand"
+                    android:inputType="text"
+                    android:selectAllOnFocus="false" />
 
                 <EditText
                     android:id="@+id/deviceidNumber"
@@ -92,7 +91,7 @@
                     android:tooltipText="Condition" />
 
                 <ImageView
-                    android:id="@+id/receipt"
+                    android:id="@+id/imageView"
                     android:layout_width="match_parent"
                     android:layout_height="87dp"
                     android:layout_weight="1"
@@ -103,8 +102,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Add Receipt"
-                    />
+                    android:text="Add Receipt" />
 
             </LinearLayout>
 
@@ -120,24 +118,25 @@
                 app:layout_constraintStart_toStartOf="parent"
                 tools:layout_editor_absoluteY="468dp">
 
-                <ProgressBar
-                    android:id="@+id/uploadBar"
-                    style="?android:attr/progressBarStyleHorizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1" />
-
                 <Button
-                    android:id="@+id/addDeviceButton"
+                    android:id="@+id/saveDeviceButton"
                     android:layout_width="match_parent"
                     android:layout_height="60dp"
                     android:backgroundTint="@color/colorPrimary"
                     android:paddingBottom="10dp"
-                    android:text="Add Device" />
+                    android:text="Save" />
+
+                <Button
+                    android:id="@+id/saveDeviceButton2"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:backgroundTint="@android:color/holo_red_dark"
+                    android:paddingBottom="10dp"
+                    android:text="Delete Device"
+                    android:textColor="@android:color/white" />
 
             </LinearLayout>
 
         </LinearLayout>
     </ScrollView>
-
 </android.support.constraint.ConstraintLayout>

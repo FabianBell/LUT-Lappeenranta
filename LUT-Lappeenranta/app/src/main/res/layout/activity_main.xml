@@ -23,60 +23,6 @@
                 android:layout_weight="1">
 
                 <LinearLayout
-                    android:id="@+id/devices"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <ListView
-                            android:id="@+id/deviceList"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent">
-
-                        </ListView>
-                    </LinearLayout>
-
-                    <android.support.design.widget.FloatingActionButton
-                        android:id="@+id/addDeviceButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="bottom|right"
-                        android:layout_marginBottom="10dp"
-                        android:layout_marginRight="10dp"
-                        android:layout_weight="0"
-                        android:clickable="true"
-                        app:srcCompat="@android:drawable/ic_menu_add" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/profile"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:padding="0dp">
-
-                    <android.support.design.widget.FloatingActionButton
-                        android:id="@+id/editProfileButton"
-                        android:layout_width="50dp"
-                        android:layout_height="50dp"
-                        android:layout_gravity="bottom|right"
-                        android:layout_marginRight="20dp"
-                        android:layout_marginTop="390dp"
-                        android:clickable="true"
-                        android:foregroundGravity="bottom|right"
-                        app:backgroundTint="@color/colorPrimary"
-                        app:rippleColor="@android:color/white"
-                        app:srcCompat="@android:drawable/ic_menu_edit" />
-                </LinearLayout>
-
-                <LinearLayout
                     android:id="@+id/statistics"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -87,6 +33,69 @@
                         android:layout_height="match_parent" />
                 </LinearLayout>
 
+                <LinearLayout
+                    android:id="@+id/devices"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <ListView
+                        android:id="@+id/deviceList"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1">
+
+                    </ListView>
+
+                    <android.support.design.widget.FloatingActionButton
+                        android:id="@+id/addDeviceButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:layout_marginBottom="10dp"
+                        android:layout_marginEnd="10dp"
+                        android:layout_weight="0"
+                        android:clickable="true"
+                        android:focusable="true"
+                        app:backgroundTint="@color/colorPrimary"
+                        app:fabSize="normal"
+                        app:rippleColor="@android:color/white"
+                        app:srcCompat="@drawable/icon_plus" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/profile"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <ListView
+                        android:id="@+id/profileList"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1">
+
+                    </ListView>
+
+                    <android.support.design.widget.FloatingActionButton
+                        android:id="@+id/editProfileButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:layout_marginBottom="10dp"
+                        android:layout_marginEnd="10dp"
+                        android:layout_weight="0"
+                        android:clickable="true"
+                        android:focusable="true"
+                        app:backgroundTint="@color/colorPrimary"
+                        app:elevation="0dp"
+                        app:fabSize="normal"
+                        app:rippleColor="@android:color/white"
+                        app:srcCompat="@drawable/icon_pen" />
+
+                </LinearLayout>
+
             </FrameLayout>
 
             <TabWidget
@@ -94,7 +103,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="0"
-                android:background="@color/colorPrimary" >
+                android:background="@color/colorPrimary">
 
             </TabWidget>
         </LinearLayout>
