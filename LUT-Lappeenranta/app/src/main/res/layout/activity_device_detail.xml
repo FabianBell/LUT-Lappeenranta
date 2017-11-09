@@ -202,17 +202,18 @@
     </ScrollView>
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/floatingActionButton5"
+        android:id="@+id/editDeviceButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginEnd="10dp"
         android:clickable="true"
         android:foregroundGravity="bottom|right"
         app:backgroundTint="@color/colorPrimary"
+        app:fabSize="normal"
         app:layout_constraintBottom_toBottomOf="@+id/scrollView2"
         app:layout_constraintEnd_toEndOf="@+id/scrollView2"
         app:rippleColor="@color/com_facebook_button_background_color_focused"
-        app:srcCompat="@android:drawable/ic_menu_edit" />
+        app:srcCompat="@drawable/icon_pen" />
 
 </android.support.constraint.ConstraintLayout>

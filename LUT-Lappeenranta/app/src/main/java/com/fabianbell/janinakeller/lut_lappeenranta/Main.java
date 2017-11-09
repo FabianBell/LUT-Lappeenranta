@@ -6,10 +6,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TabHost;
+import android.widget.Toolbar;
 
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
@@ -24,7 +27,6 @@ public class Main extends AppCompatActivity {
 
     private Firebase mRootRef;
     private FirebaseAuth mAuth;
-
 
     private TabHost host;
 
@@ -77,8 +79,7 @@ public class Main extends AppCompatActivity {
         mAddDeviceButton = (FloatingActionButton) findViewById(R.id.addDeviceButton);
         Integer [] imgid;
 
-
-        mAddDeviceButton.setOnClickListener(new View.OnClickListener() {
+       mAddDeviceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(Main.this, AddDevice.class));
@@ -131,6 +132,16 @@ public class Main extends AppCompatActivity {
             @Override
             public void onCancelled(FirebaseError firebaseError) {
 
+            }
+        });
+
+        mDeviceList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(Main.this, DeviceDetail.class);
+                intent.putExtra("Device", mDeviceList.getItemAtPosition(position).toString());
+                startActivity(intent);
             }
         });
 

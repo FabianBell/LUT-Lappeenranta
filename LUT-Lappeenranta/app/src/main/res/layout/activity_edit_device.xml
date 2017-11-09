@@ -48,7 +48,7 @@
                     android:selectAllOnFocus="false" />
 
                 <EditText
-                    android:id="@+id/deviceidNumber"
+                    android:id="@+id/deviceIDNumber"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -104,6 +104,13 @@
                     android:layout_weight="1"
                     android:text="Add Receipt" />
 
+                <ProgressBar
+                    android:id="@+id/uploadReceiptProgressBar"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
             </LinearLayout>
 
             <LinearLayout
@@ -127,7 +134,7 @@
                     android:text="Save" />
 
                 <Button
-                    android:id="@+id/saveDeviceButton2"
+                    android:id="@+id/deleteDeviceButton"
                     android:layout_width="match_parent"
                     android:layout_height="60dp"
                     android:backgroundTint="@android:color/holo_red_dark"

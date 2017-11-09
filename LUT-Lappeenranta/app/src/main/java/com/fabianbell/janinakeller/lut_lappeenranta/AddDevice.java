@@ -97,6 +97,9 @@ public class AddDevice extends AppCompatActivity {
     //Permission
     static final int PERMISSION_REQUEST_CODE_CAMERA = 2;
 
+    //image
+    private String imagePath;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -372,8 +375,6 @@ public class AddDevice extends AppCompatActivity {
             }
         }
     }
-
-    private String imagePath;
 
     private File createImageFile() throws IOException{
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());

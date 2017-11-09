@@ -30,6 +30,8 @@
         <activity android:name=".SignUp" />
         <activity android:name=".AddDevice"/>
         <activity android:name=".EditProfile"/>
+        <activity android:name=".DeviceDetail"/>
+        <activity android:name=".EditDevice"/>
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="com.fabianbell.janinakeller.lut_lappeenranta.fileprovider"
