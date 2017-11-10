@@ -18,6 +18,8 @@ import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.firebase.client.MutableData;
+import com.firebase.client.Transaction;
 import com.firebase.client.ValueEventListener;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -77,7 +79,6 @@ public class Main extends AppCompatActivity {
 
         ////////////////////////////////// Devices /////////////////////////////////////////
         mAddDeviceButton = (FloatingActionButton) findViewById(R.id.addDeviceButton);
-        Integer [] imgid;
 
        mAddDeviceButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -97,21 +98,20 @@ public class Main extends AppCompatActivity {
 
         mRootRef.child("User").child(mAuth.getCurrentUser().getUid()).child("Devices").addChildEventListener(new ChildEventListener() {
             @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                mRootRef.child("User").child(mAuth.getCurrentUser().getUid()).child("Devices").child(dataSnapshot.getKey()).child("modelName").addListenerForSingleValueEvent(new ValueEventListener() {
+            public void onChildAdded(final DataSnapshot dataSnapshot, final String s) {
+                final Firebase device = mRootRef.child("Device").child(dataSnapshot.getKey());
+                String display = dataSnapshot.getKey();
+                device.addChildEventListener(new FirebaseValueListener<String>(display, new CallableForFirebase<String>() {
                     @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        String device = dataSnapshot.getValue(String.class);
-                        devices.add(device);
-                        Log.d("DeviceList", "Load Device: " + device);
-                        deviceListAdapter.notifyDataSetChanged();
+                    public void call(String param, DataSnapshot data) {
+                        if (data.getKey().toString().equals("modelName")) {
+                            String display = data.getValue(String.class) + " | " + param;
+                            Log.d("DeviceList", "Load Device: " + display);
+                            devices.add(display);
+                            deviceListAdapter.notifyDataSetChanged();
+                        }
                     }
-
-                    @Override
-                    public void onCancelled(FirebaseError firebaseError) {
-
-                    }
-                });
+                }));
             }
 
             @Override

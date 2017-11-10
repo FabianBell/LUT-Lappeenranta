@@ -12,6 +12,8 @@ public class DeviceDetail extends AppCompatActivity {
 
     //TODO add device detail to devices
 
+    //device
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

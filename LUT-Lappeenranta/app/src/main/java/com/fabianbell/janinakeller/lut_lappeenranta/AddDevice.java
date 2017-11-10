@@ -172,7 +172,9 @@ public class AddDevice extends AppCompatActivity {
                 String date = mDeviceDateOfPurchase.getText().toString();
                 String condition = mDeviceCondition.getSelectedItem().toString();
 
-                Firebase deviceByNumber = mRootRef.child("User").child(mAuth.getCurrentUser().getUid()).child("Devices").child(deviceNumber);
+                Firebase deviceByNumber = mRootRef.child("Device").child(deviceNumber);
+                //connect device to user
+                mRootRef.child("User").child(mAuth.getCurrentUser().getUid()).child("Devices").child(deviceNumber).setValue("deviceNumber");
                 Log.d("Device", "Start saving Device with Number: " + deviceNumber);
                 deviceByNumber.child("category").setValue(category);
                 deviceByNumber.child("brandName").setValue(brandName);
