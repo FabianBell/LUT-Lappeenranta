@@ -18,6 +18,8 @@ import android.support.v4.content.FileProvider;
 import android.support.v4.content.PermissionChecker;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
@@ -41,6 +43,7 @@ import com.firebase.client.ValueEventListener;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.crash.FirebaseCrash;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
@@ -62,7 +65,6 @@ import java.util.Map;
 
 public class AddDevice extends AppCompatActivity {
 
-    //Todo add Firebase log for crash report
     private Firebase mRootRef;
     private FirebaseAuth mAuth;
     private FirebaseStorage storage;
@@ -101,6 +103,13 @@ public class AddDevice extends AppCompatActivity {
     //image
     private String imagePath;
 
+    //Adapter
+    private ArrayAdapter<String> modelAdapter;
+    private ArrayAdapter<String> categoryAdapter;
+    private ArrayAdapter<String> conditionAdapter;
+    private ArrayAdapter<String> brandAdapter;
+    private boolean brandChanged;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -137,25 +146,25 @@ public class AddDevice extends AppCompatActivity {
 
         brands = new ArrayList<>();
 
-        final ArrayAdapter<String> brandAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, brands);
+        brandAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, brands);
 
         mDeviceBrand.setAdapter(brandAdapter);
 
         modelOfBrand = new ArrayList<>();
 
-        final ArrayAdapter<String> modelAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, modelOfBrand);
+        modelAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, modelOfBrand);
 
         mDeviceModel.setAdapter(modelAdapter);
 
         categories = new ArrayList<>();
 
-        final ArrayAdapter<String> categoryAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, categories);
+        categoryAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, categories);
 
         mDeviceCategory.setAdapter(categoryAdapter);
 
         condition = new ArrayList<>();
 
-        final  ArrayAdapter<String> conditionAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, condition);
+        conditionAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, condition);
 
         mDeviceCondition.setAdapter(conditionAdapter);
 
@@ -177,6 +186,7 @@ public class AddDevice extends AppCompatActivity {
                 //connect device to user
                 mRootRef.child("User").child(mAuth.getCurrentUser().getUid()).child("Devices").child(deviceNumber).setValue("deviceNumber");
                 Log.d("Device", "Start saving Device with Number: " + deviceNumber);
+                FirebaseCrash.log("Start saving Device with Number: " + deviceNumber);
                 deviceByNumber.child("category").setValue(category);
                 deviceByNumber.child("brandName").setValue(brandName);
                 deviceByNumber.child("modelName").setValue(modelName);
@@ -185,6 +195,7 @@ public class AddDevice extends AppCompatActivity {
                 deviceByNumber.child("date").setValue(date);
                 deviceByNumber.child("condition").setValue(condition);
                 Log.d("AddDevice - Device", "Device saved");
+                FirebaseCrash.log("Device saved");
 
                 //upload receipt
                 if (imagePath != null) {
@@ -209,14 +220,17 @@ public class AddDevice extends AppCompatActivity {
                         public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                             if (task.isSuccessful()){
                                 Log.d("Receipt", "Uploaded");
+                                FirebaseCrash.log("Uploaded");
                                 startActivity(new Intent(AddDevice.this, Main.class));
                             }else{
                                 Log.d("Receipt", "Cannot upload Image > " + task.getException().getMessage());
+                                FirebaseCrash.report(task.getException());
                             }
                         }
                     });
                 }else {
                     Log.d("Receipt", "Upload without Receipt");
+                    FirebaseCrash.log("Upload without Receipt");
                     startActivity(new Intent(AddDevice.this, Main.class));
                 }
             }
@@ -230,6 +244,7 @@ public class AddDevice extends AppCompatActivity {
                     ActivityCompat.requestPermissions(AddDevice.this, new String[]{Manifest.permission.CAMERA}, PERMISSION_REQUEST_CODE_CAMERA);
                 }else{
                     Log.d("Receipt", "Add Reciept");
+                    FirebaseCrash.log("Add Reciept");
                     takePicture();
                 }
             }
@@ -240,6 +255,7 @@ public class AddDevice extends AppCompatActivity {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Log.d("Category", "Load Category: " + dataSnapshot.getKey());
+                FirebaseCrash.log("Load Category: " + dataSnapshot.getKey());
                 categories.add(dataSnapshot.getKey());
                 categoryAdapter.notifyDataSetChanged();
             }
@@ -270,6 +286,7 @@ public class AddDevice extends AppCompatActivity {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Log.d("Condition", "Load Condition: " + dataSnapshot.getKey());
+                FirebaseCrash.log("Load Condition: " + dataSnapshot.getKey());
                 condition.add(dataSnapshot.getKey());
                 conditionAdapter.notifyDataSetChanged();
             }
@@ -300,6 +317,7 @@ public class AddDevice extends AppCompatActivity {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Log.d("Brands", "Load Brand: " + dataSnapshot.getKey().toString());
+                FirebaseCrash.log("Load Brand: " + dataSnapshot.getKey().toString());
                 brands.add(dataSnapshot.getKey());
                 brandAdapter.notifyDataSetChanged();
             }
@@ -324,31 +342,55 @@ public class AddDevice extends AppCompatActivity {
 
             }
         });
-
-        mDeviceBrand.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        //only update model if brand was changed
+        mDeviceBrand.addTextChangedListener(new TextWatcher() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                mRootRef.child("Brand").child(mDeviceBrand.getText().toString()).child("Model").addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if(dataSnapshot.getValue() != null) {
-                            Map<String, String> model = dataSnapshot.getValue(Map.class);
-                            Log.d("Model", "Models clear");
-                            modelOfBrand = new ArrayList<>();
-                            for (String i : model.keySet()) {
-                                Log.d("Model", "Load Model: " + model.get(i));
-                                modelOfBrand.add(model.get(i));
-                            }
-                            Log.d("Model", "Models complete: " + modelOfBrand);
-                            modelAdapter.notifyDataSetChanged();
-                            //todo bug fix: autocomplete does not show models
-                        }
-                    }
-                    @Override
-                    public void onCancelled(FirebaseError firebaseError) {
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-                    }
-                });
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                brandChanged = true;
+                Log.d("Model", "Brand changed");
+                FirebaseCrash.log("Brand changed");
+            }
+        });
+        mDeviceModel.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (brandChanged) {
+                    modelOfBrand.removeAll(modelOfBrand);
+                    modelAdapter.notifyDataSetChanged();
+                    Log.d("Model", "Models clear");
+                    FirebaseCrash.log("Models clear");
+                    mRootRef.child("Brand").child(mDeviceBrand.getText().toString()).child("Model").addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                                String value = snapshot.getValue().toString();
+                                modelOfBrand.add(value);
+                                modelAdapter.notifyDataSetChanged();
+                                Log.d("Model", "Load model: " + value);
+                                FirebaseCrash.log("Load model: " + value);
+                            }
+                            brandChanged = false;
+                            Log.d("Model", "Model updated");
+                            FirebaseCrash.log("Model updated");
+                        }
+
+                        @Override
+                        public void onCancelled(FirebaseError firebaseError) {
+                            Log.d("Model", firebaseError.getMessage());
+                            FirebaseCrash.report(firebaseError.toException());
+                        }
+                    });
+                }
             }
         });
     }
@@ -369,6 +411,7 @@ public class AddDevice extends AppCompatActivity {
                 imageFile = createImageFile();
             }catch (IOException e){
                 Log.d("Receipt", "Cannot create image file");
+                FirebaseCrash.log("Cannot create image file");
             }
             if (imageFile != null) {
 
@@ -394,6 +437,7 @@ public class AddDevice extends AppCompatActivity {
         if (requestCode == PERMISSION_REQUEST_CODE_CAMERA) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Log.d("Receipt", "Add Reciept");
+                FirebaseCrash.log("Add Reciept");
                 takePicture();
             }
             else {
@@ -407,6 +451,7 @@ public class AddDevice extends AppCompatActivity {
         //display picture
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             Log.d("Receipt", "Took Picture");
+            FirebaseCrash.log("Took Picture");
             displayImage();
         }
     }
@@ -422,6 +467,7 @@ public class AddDevice extends AppCompatActivity {
             imageBitmap = rotateBitmap(imageBitmap, orientation);
         } catch (IOException e) {
             Log.d("Receipt", "Cannot find image file");
+            FirebaseCrash.log("Cannot find image file");
         }
         mReceipt.setImageBitmap(imageBitmap);
     }

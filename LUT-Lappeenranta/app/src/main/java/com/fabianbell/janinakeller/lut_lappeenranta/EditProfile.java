@@ -11,6 +11,7 @@ import android.widget.EditText;
 import android.widget.TabHost;
 import android.widget.Toast;
 
+import com.firebase.client.Firebase;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -20,7 +21,7 @@ import com.google.firebase.auth.FirebaseUser;
 public class EditProfile extends AppCompatActivity {
 
     //Auth
-    private FirebaseAuth mFirebaseAuth;
+    private FirebaseAuth mAuth;
     private FirebaseUser currentUser;
 
     //Fields
@@ -38,8 +39,8 @@ public class EditProfile extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_profile);
 
-        mFirebaseAuth = FirebaseAuth.getInstance();
-        currentUser = mFirebaseAuth.getCurrentUser();
+        mAuth = FirebaseAuth.getInstance();
+        currentUser = mAuth.getCurrentUser();
 
         //get Elements
         mUsereMail = (EditText) findViewById(R.id.usereMail);
@@ -59,7 +60,7 @@ public class EditProfile extends AppCompatActivity {
                 String passwordConfirmation = mUserPasswordConfirmation.getText().toString();
 
                 if (password.equals(passwordConfirmation)) {
-                    // TODO Mehtod beennden :)
+                    // TODO Janina: update view
                 } else {
                     Toast.makeText(EditProfile.this, "Passwords do not match", Toast.LENGTH_LONG);
                 }
@@ -76,7 +77,7 @@ public class EditProfile extends AppCompatActivity {
         mLogOutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mFirebaseAuth.signOut();
+                mAuth.signOut();
                 if(currentUser.isAnonymous()){
                     currentUser.delete();
                 }

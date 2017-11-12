@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v4.content.PermissionChecker;
@@ -45,7 +46,6 @@ import java.util.Date;
 
 public class DeviceDetail extends AppCompatActivity {
 
-    //Todo add Firebase log for crash report
     //Firebase
     Firebase mRefRoot;
     private StorageReference storageReference;
@@ -105,7 +105,9 @@ public class DeviceDetail extends AppCompatActivity {
         mEditDeviceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(DeviceDetail.this, EditDevice.class));
+                Intent editDeviceIntent = new Intent(DeviceDetail.this, EditDevice.class);
+                editDeviceIntent.putExtra("deviceId", deviceId);
+                startActivity(editDeviceIntent);
             }
         });
 
@@ -114,10 +116,13 @@ public class DeviceDetail extends AppCompatActivity {
             public void onClick(View v) {
                 if(PermissionChecker.checkSelfPermission(DeviceDetail.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
                     Log.d("Reciept", "Do not have write permission");
+                    FirebaseCrash.log("Do not have write permission");
                     ActivityCompat.requestPermissions(DeviceDetail.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE_WRITE_EXTERNAL_STORAGE);
                 }else{
                     Log.d("Reciept", "Have write Permission");
+                    FirebaseCrash.log("Have write Permission");
                     Log.d("Reciept", "Start with download");
+                    FirebaseCrash.log("Start with download");
                     downloadImage();
                 }
             }
@@ -149,6 +154,7 @@ public class DeviceDetail extends AppCompatActivity {
                                             mDeviceShop.setText(dataSnapshot.getValue(String.class));
                                         }else{
                                             Log.e("deviceData", "Cannot categorize Data with key: " + key);
+                                            FirebaseCrash.log("Cannot categorize Data with key: " + key);
                                         }
                                     }
                                 }
@@ -191,12 +197,15 @@ public class DeviceDetail extends AppCompatActivity {
             boolean result = saveDir.mkdir();
             if(result){
                 Log.d("Reciept", "created dir: " + saveDir.getAbsolutePath());
+                FirebaseCrash.log("created dir: " + saveDir.getAbsolutePath());
             }else{
                 Log.d("Reciept", "Cannot create dir: " + saveDir.getAbsolutePath());
+                FirebaseCrash.log("Cannot create dir: " + saveDir.getAbsolutePath());
             }
         }
         File image = File.createTempFile(imageFileName, ".jpg", saveDir);
         Log.d("Reciept", "created image " + image.getAbsolutePath());
+        FirebaseCrash.log("created image " + image.getAbsolutePath());
         imagePath = image.getAbsolutePath();
         return image;
     }
@@ -207,12 +216,15 @@ public class DeviceDetail extends AppCompatActivity {
         if (requestCode == PERMISSION_REQUEST_CODE_WRITE_EXTERNAL_STORAGE) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Log.d("Receipt", "Persmission updated");
+                FirebaseCrash.log("Persmission updated");
                 Log.d("Reciept", "Start with download");
+                FirebaseCrash.log("Start with download");
                 downloadImage();
             }
             else {
                 Log.d("Reciept", "Permission cannot be updated");
-                Toast.makeText(DeviceDetail.this, "Without the permission you can not download a picture", Toast.LENGTH_LONG);
+                FirebaseCrash.log("Permission cannot be updated");
+                Toast.makeText(DeviceDetail.this, "Without the permission you can not download a picture", Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -224,19 +236,20 @@ public class DeviceDetail extends AppCompatActivity {
             downloadTask.addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                    //Todo display image
                     Log.d("Reciept", "saved image at " + imagePath);
+                    FirebaseCrash.log("saved image at " + imagePath);
                     Intent scannIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
                     Uri imageUri = Uri.fromFile(image);
                     scannIntent.setData(imageUri);
                     sendBroadcast(scannIntent);
                     Log.d("Reciept","Image scanned for gallary");
                     FirebaseCrash.log("Image scanned for gallary");
+                    Toast.makeText(DeviceDetail.this, "Reciept is saved in your gallary", Toast.LENGTH_LONG).show();
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
-                    Toast.makeText(DeviceDetail.this, "Cannot download reciept: " + e.getMessage(), Toast.LENGTH_LONG);
+                    Toast.makeText(DeviceDetail.this, "Cannot download reciept: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 }
             });
             downloadTask.addOnProgressListener(new OnProgressListener<FileDownloadTask.TaskSnapshot>() {
@@ -248,8 +261,15 @@ public class DeviceDetail extends AppCompatActivity {
             });
         } catch (IOException e) {
             Log.d("Reciept", "Cannot create Image File: " + e.getMessage());
-            Toast.makeText(DeviceDetail.this, "Cannot create Image File: " + e.getMessage(), Toast.LENGTH_LONG);
+            FirebaseCrash.report(e);
+            Toast.makeText(DeviceDetail.this, "Cannot create Image File: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState){
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putString("IMAGE_PATH", imagePath);
     }
 
     private void galleryAddpic() {
