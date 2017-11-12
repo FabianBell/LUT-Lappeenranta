@@ -62,6 +62,7 @@ import java.util.Map;
 
 public class AddDevice extends AppCompatActivity {
 
+    //Todo add Firebase log for crash report
     private Firebase mRootRef;
     private FirebaseAuth mAuth;
     private FirebaseStorage storage;
@@ -187,7 +188,7 @@ public class AddDevice extends AppCompatActivity {
 
                 //upload receipt
                 if (imagePath != null) {
-                    StorageReference imageRef = storageReference.child(mAuth.getCurrentUser().getUid() + ".jpg");
+                    StorageReference imageRef = storageReference.child(mAuth.getCurrentUser().getUid() + "_" + deviceNumber + ".jpg");
                     File imageFile = new File(imagePath);
                     Uri imageUri = FileProvider.getUriForFile(AddDevice.this, "com.fabianbell.janinakeller.lut_lappeenranta.fileprovider", imageFile);
                     uploadTask = imageRef.putFile(imageUri);

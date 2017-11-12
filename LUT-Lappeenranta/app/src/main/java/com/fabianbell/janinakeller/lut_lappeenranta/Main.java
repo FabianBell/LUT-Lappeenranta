@@ -105,7 +105,7 @@ public class Main extends AppCompatActivity {
                     @Override
                     public void call(String param, DataSnapshot data) {
                         if (data.getKey().toString().equals("modelName")) {
-                            String display = data.getValue(String.class) + " | " + param;
+                            String display = data.getValue(String.class) + " - " + param;
                             Log.d("DeviceList", "Load Device: " + display);
                             devices.add(display);
                             deviceListAdapter.notifyDataSetChanged();
@@ -140,7 +140,10 @@ public class Main extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(Main.this, DeviceDetail.class);
-                intent.putExtra("Device", mDeviceList.getItemAtPosition(position).toString());
+                String element = mDeviceList.getItemAtPosition(position).toString();
+                element = element.split(" - ")[1];
+                Log.d("ListElement", "Number: " + element);
+                intent.putExtra("DeviceId", element);
                 startActivity(intent);
             }
         });
