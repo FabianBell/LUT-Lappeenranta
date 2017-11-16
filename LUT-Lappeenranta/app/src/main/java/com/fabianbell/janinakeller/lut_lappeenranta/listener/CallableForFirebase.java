@@ -1,4 +1,4 @@
-package com.fabianbell.janinakeller.lut_lappeenranta;
+package com.fabianbell.janinakeller.lut_lappeenranta.listener;
 
 import com.firebase.client.DataSnapshot;
 

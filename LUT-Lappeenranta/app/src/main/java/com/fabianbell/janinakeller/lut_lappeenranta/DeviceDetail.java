@@ -24,6 +24,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fabianbell.janinakeller.lut_lappeenranta.listener.SimpleFirebaseListener;
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
@@ -66,10 +67,12 @@ public class DeviceDetail extends AppCompatActivity {
 
     //device
     private String deviceId;
+    private String deviceModel;
+
     private TextView mDeviceModel;
     private TextView mDeviceCategory;
     private TextView mDeviceBrand;
-    private TextView mDeviceIdNumber;
+    private TextView mDeviceNumber;
     private TextView mDevicePrice;
     private TextView mDeviceShop;
     private TextView mDeviceDate;
@@ -84,6 +87,7 @@ public class DeviceDetail extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
 
         deviceId = getIntent().getStringExtra("DeviceId");
+        deviceModel = getIntent().getStringExtra("DeviceModel");
         storageReference = FirebaseStorage.getInstance().getReference().child("User_receipt").child(mAuth.getCurrentUser().getUid() + "_" + deviceId + ".jpg" );
 
         //get Elements
@@ -95,7 +99,7 @@ public class DeviceDetail extends AppCompatActivity {
         mDeviceModel = (TextView) findViewById(R.id.DeviceDetailModel);
         mDeviceCategory = (TextView) findViewById(R.id.DeviceDetailCategory);
         mDeviceBrand = (TextView) findViewById(R.id.DeviceDetailBrand);
-        mDeviceIdNumber = (TextView) findViewById(R.id.DeviceDetailPrice);
+        mDeviceNumber = (TextView) findViewById(R.id.DeviceDetailNumber);
         mDevicePrice = (TextView) findViewById(R.id.DeviceDetailPrice);
         mDeviceShop = (TextView) findViewById(R.id.DeviceDetailShop);
         mDeviceDate = (TextView) findViewById(R.id.DeviceDetailDate);
@@ -128,33 +132,39 @@ public class DeviceDetail extends AppCompatActivity {
             }
         });
 
-        mRefRoot.child("Device").child(deviceId).addChildEventListener(new ChildEventListener() {
+        mRefRoot.child("Device").child(deviceId).addChildEventListener(new SimpleFirebaseListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 String key = dataSnapshot.getKey();
+                String value = dataSnapshot.getValue().toString();
                 if (key.equals("brandName")){
-                    mDeviceBrand.setText(dataSnapshot.getValue(String.class));
+                    mDeviceBrand.setText(value);
                 }else{
                     if(key.equals("category")){
-                        mDeviceCategory.setText(dataSnapshot.getValue(String.class));
+                        mDeviceCategory.setText(value);
                     }else{
                         if(key.equals("condition")){
-                            mDeviceCondition.setText(dataSnapshot.getValue(String.class));
+                            mDeviceCondition.setText(value);
                         }else{
                             if(key.equals("date")){
-                                mDeviceDate.setText(dataSnapshot.getValue(String.class));
+                                mDeviceDate.setText(value);
                             }else{
                                 if(key.equals("modelName")){
-                                    mDeviceModel.setText(dataSnapshot.getValue(String.class));
+                                    mDeviceModel.setText(deviceModel);
                                 }else{
                                     if(key.equals("price")){
-                                        mDevicePrice.setText(dataSnapshot.getValue(String.class));
+                                        mDevicePrice.setText(value);
                                     }else{
                                         if(key.equals("shop")){
-                                            mDeviceShop.setText(dataSnapshot.getValue(String.class));
+                                            mDeviceShop.setText(value);
                                         }else{
-                                            Log.e("deviceData", "Cannot categorize Data with key: " + key);
-                                            FirebaseCrash.log("Cannot categorize Data with key: " + key);
+                                            if(key.equals("deviceNumber")){
+                                                mDeviceNumber.setText(value);
+                                            }else {
+                                                //todo display unknown model or brand
+                                                Log.e("deviceData", "Cannot categorize Data with key: " + key);
+                                                FirebaseCrash.log("Cannot categorize Data with key: " + key);
+                                            }
                                         }
                                     }
                                 }
@@ -162,26 +172,6 @@ public class DeviceDetail extends AppCompatActivity {
                         }
                     }
                 }
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-
             }
         });
 

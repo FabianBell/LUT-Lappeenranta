@@ -1,14 +1,11 @@
-package com.fabianbell.janinakeller.lut_lappeenranta;
+package com.fabianbell.janinakeller.lut_lappeenranta.listener;
 
-import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 
-import java.util.ArrayList;
-import com.fabianbell.janinakeller.lut_lappeenranta.CallableForFirebase;
+import com.fabianbell.janinakeller.lut_lappeenranta.listener.CallableForFirebase;
 import com.google.firebase.crash.FirebaseCrash;
 
 /**

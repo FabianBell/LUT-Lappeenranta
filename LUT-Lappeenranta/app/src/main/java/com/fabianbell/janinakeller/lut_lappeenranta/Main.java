@@ -8,20 +8,20 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TabHost;
-import android.widget.Toolbar;
 
+import com.fabianbell.janinakeller.lut_lappeenranta.listener.CallableForFirebase;
+import com.fabianbell.janinakeller.lut_lappeenranta.listener.CallableValueEventListener;
+import com.fabianbell.janinakeller.lut_lappeenranta.listener.FirebaseValueListener;
+import com.fabianbell.janinakeller.lut_lappeenranta.listener.SimpleFirebaseListener;
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
-import com.firebase.client.MutableData;
-import com.firebase.client.Transaction;
 import com.firebase.client.ValueEventListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.crash.FirebaseCrash;
 
 import java.util.ArrayList;
 
@@ -80,7 +80,7 @@ public class Main extends AppCompatActivity {
         ////////////////////////////////// Devices /////////////////////////////////////////
         mAddDeviceButton = (FloatingActionButton) findViewById(R.id.addDeviceButton);
 
-       mAddDeviceButton.setOnClickListener(new View.OnClickListener() {
+        mAddDeviceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(Main.this, AddDevice.class));
@@ -96,42 +96,42 @@ public class Main extends AppCompatActivity {
 
         mDeviceList.setAdapter(deviceListAdapter);
 
-        mRootRef.child("User").child(mAuth.getCurrentUser().getUid()).child("Devices").addChildEventListener(new ChildEventListener() {
+        mRootRef.child("User").child(mAuth.getCurrentUser().getUid()).child("Devices").addChildEventListener(new SimpleFirebaseListener() {
             @Override
-            public void onChildAdded(final DataSnapshot dataSnapshot, final String s) {
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 final Firebase device = mRootRef.child("Device").child(dataSnapshot.getKey());
                 String display = dataSnapshot.getKey();
-                device.addChildEventListener(new FirebaseValueListener<String>(display, new CallableForFirebase<String>() {
+                //get model ID
+                device.child("modelName").addListenerForSingleValueEvent(new CallableValueEventListener<String>(display, new CallableForFirebase<String>() {
                     @Override
                     public void call(String param, DataSnapshot data) {
-                        if (data.getKey().toString().equals("modelName")) {
-                            String display = data.getValue(String.class) + " - " + param;
-                            Log.d("DeviceList", "Load Device: " + display);
-                            devices.add(display);
-                            deviceListAdapter.notifyDataSetChanged();
-                        }
+                        final ArrayList<String> paramPack = new ArrayList<>();
+                        String modelId = data.getValue().toString();
+                        //param = display
+                        paramPack.add(param);
+                        paramPack.add(modelId);
+                        //get Brand name
+                        device.child("brandName").addListenerForSingleValueEvent(new CallableValueEventListener<ArrayList<String>>(paramPack, new CallableForFirebase<ArrayList<String>>() {
+                            @Override
+                            public void call(ArrayList<String> param, DataSnapshot data) {
+                                String brandName = data.getValue().toString();
+                                //get Model name with brand name and model ID
+                                mRootRef.child("Brand").child(brandName).child("Model").child(paramPack.get(1)).addListenerForSingleValueEvent(new CallableValueEventListener<String>(paramPack.get(0), new CallableForFirebase<String>() {
+                                    @Override
+                                    public void call(String param, DataSnapshot data) {
+                                        String modelName = data.getValue().toString();
+                                        //param = display
+                                        String display = modelName + " - " + param;
+                                        Log.d("DeviceList", "Load Device: " + display);
+                                        FirebaseCrash.log("Load Device: " + display);
+                                        devices.add(display);
+                                        deviceListAdapter.notifyDataSetChanged();
+                                    }
+                                }));
+                            }
+                        }));
                     }
                 }));
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-
             }
         });
 
@@ -141,9 +141,12 @@ public class Main extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(Main.this, DeviceDetail.class);
                 String element = mDeviceList.getItemAtPosition(position).toString();
-                element = element.split(" - ")[1];
-                Log.d("ListElement", "Number: " + element);
-                intent.putExtra("DeviceId", element);
+                String[] split = element.split(" - ");
+                String deviceId = split[1];
+                String deviceModel = split[0];
+                Log.d("ListElement", "Number: " + deviceId);
+                intent.putExtra("DeviceId", deviceId);
+                intent.putExtra("DeviceModel", deviceModel);
                 startActivity(intent);
             }
         });
