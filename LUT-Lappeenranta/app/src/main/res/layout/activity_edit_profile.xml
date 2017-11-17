@@ -24,21 +24,12 @@
                 android:hint="E-Mail Adress"
                 android:inputType="textEmailAddress" />
 
-            <EditText
-                android:id="@+id/userPassword"
+            <TextView
+                android:id="@+id/changePassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:ems="10"
-                android:hint="Password"
-                android:inputType="textPassword" />
-
-            <EditText
-                android:id="@+id/userPasswordConfirmation"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:hint="Confirm Password"
-                android:inputType="textPassword" />
+                android:text="@string/change_password"
+                android:textSize="18sp" />
 
             <Button
                 android:id="@+id/editProfileButton"
@@ -46,7 +37,7 @@
                 android:layout_height="60dp"
                 android:layout_marginTop="40dp"
                 android:backgroundTint="@color/colorPrimary"
-                android:text="Save" />
+                android:text="@string/save" />
 
             <Button
                 android:id="@+id/deleteProfileButton"

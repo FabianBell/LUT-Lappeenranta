@@ -8,8 +8,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TabHost;
+import android.widget.TextView;
 
 import com.fabianbell.janinakeller.lut_lappeenranta.listener.CallableForFirebase;
 import com.fabianbell.janinakeller.lut_lappeenranta.listener.CallableValueEventListener;
@@ -21,19 +23,28 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.crash.FirebaseCrash;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
 public class Main extends AppCompatActivity {
 
+    //Auth
+    private FirebaseUser currentUser;
     private Firebase mRootRef;
     private FirebaseAuth mAuth;
 
     private TabHost host;
 
     //Profile Elements
-    private FloatingActionButton editProfileButton;
+    private TextView mProfileEmailTextView;
+    private TextView mProfileNumberOfDevices;
+
+    private Button mProfileLogOutButton;
+    private FloatingActionButton mEditProfileButton;
 
     //Device
     private ListView mDeviceList;
@@ -69,8 +80,26 @@ public class Main extends AppCompatActivity {
         host.addTab(spec3);
 
         ///////////////////////////////////// Profile //////////////////////////////////////
-        editProfileButton = (FloatingActionButton) findViewById(R.id.editProfileButton);
-        editProfileButton.setOnClickListener(new View.OnClickListener() {
+
+        mProfileEmailTextView = (TextView) findViewById(R.id.profileEmailTextView);
+        mProfileNumberOfDevices = (TextView) findViewById(R.id.profileNumberOfDevices);
+        mProfileLogOutButton = (Button) findViewById(R.id.profileLougOutButton);
+        mEditProfileButton = (FloatingActionButton) findViewById(R.id.editProfileButton);
+
+        // TODO Fabian display user email and number of devices
+
+        mProfileLogOutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mAuth.signOut();
+                if(currentUser.isAnonymous()){
+                    currentUser.delete();
+                }
+                startActivity(new Intent(Main.this, LogIn.class));
+            }
+        });
+
+        mEditProfileButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(Main.this, EditProfile.class));

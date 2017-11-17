@@ -125,5 +125,13 @@ public class EditDevice extends AppCompatActivity {
         storageReference = storage.getReference().child("User_receipt");
 
 
+        mDeleteDeviceButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(EditDevice.this,FaultReport.class));
+            }
+        });
+
+
     }
 }

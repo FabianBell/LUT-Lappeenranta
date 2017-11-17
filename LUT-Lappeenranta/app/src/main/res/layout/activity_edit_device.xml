@@ -131,7 +131,7 @@
                     android:layout_height="60dp"
                     android:backgroundTint="@color/colorPrimary"
                     android:paddingBottom="10dp"
-                    android:text="Save" />
+                    android:text="@string/save" />
 
                 <Button
                     android:id="@+id/deleteDeviceButton"

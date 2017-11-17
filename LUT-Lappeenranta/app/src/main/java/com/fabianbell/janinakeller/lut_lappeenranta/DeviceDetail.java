@@ -61,6 +61,7 @@ public class DeviceDetail extends AppCompatActivity {
     //Button
     private FloatingActionButton mEditDeviceButton;
     private Button mRecieptButton;
+    private Button mDeviceFaultReportButton;
 
     //special
     private ProgressBar mDownloadBar;
@@ -104,6 +105,16 @@ public class DeviceDetail extends AppCompatActivity {
         mDeviceShop = (TextView) findViewById(R.id.DeviceDetailShop);
         mDeviceDate = (TextView) findViewById(R.id.DeviceDetailDate);
         mDeviceCondition = (TextView) findViewById(R.id.DeviceDetailCondition);
+
+
+        mDeviceFaultReportButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent editDeviceIntent = new Intent(DeviceDetail.this, FaultReport.class);
+                editDeviceIntent.putExtra("deviceId", deviceId);
+                startActivity(editDeviceIntent);
+            }
+        });
 
 
         mEditDeviceButton.setOnClickListener(new View.OnClickListener() {

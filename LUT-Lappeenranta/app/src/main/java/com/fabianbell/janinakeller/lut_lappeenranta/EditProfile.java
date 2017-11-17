@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TabHost;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.client.Firebase;
@@ -18,6 +19,8 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import org.w3c.dom.Text;
+
 public class EditProfile extends AppCompatActivity {
 
     //Auth
@@ -26,13 +29,12 @@ public class EditProfile extends AppCompatActivity {
 
     //Fields
     private EditText mUsereMail;
-    private EditText mUserPassword;
-    private EditText mUserPasswordConfirmation;
 
     //Buttons
     private Button mLogOutButton;
     private Button mEditProfileButton;
     private Button mDeleteProfileButton;
+    private TextView mChangePassword;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,11 +46,17 @@ public class EditProfile extends AppCompatActivity {
 
         //get Elements
         mUsereMail = (EditText) findViewById(R.id.usereMail);
-        mUserPassword = (EditText) findViewById(R.id.userPassword);
-        mUserPasswordConfirmation = (EditText) findViewById(R.id.userPasswordConfirmation);
+        mChangePassword = (TextView) findViewById(R.id.changePassword);
         mEditProfileButton = (Button) findViewById(R.id.editProfileButton);
         mDeleteProfileButton = (Button) findViewById(R.id.deleteProfileButton);
         mLogOutButton = (Button) findViewById(R.id.logOutButton);
+
+        mChangePassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(EditProfile.this, ChangePassword.class));
+            }
+        });
 
 
 
@@ -56,14 +64,6 @@ public class EditProfile extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String eMail = mUsereMail.getText().toString();
-                String password = mUserPassword.getText().toString();
-                String passwordConfirmation = mUserPasswordConfirmation.getText().toString();
-
-                if (password.equals(passwordConfirmation)) {
-                    // TODO Janina: update view
-                } else {
-                    Toast.makeText(EditProfile.this, "Passwords do not match", Toast.LENGTH_LONG);
-                }
             }
         });
 

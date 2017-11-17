@@ -11,4 +11,22 @@
     <string name="date_of_purchase">Date of Purchase</string>
     <string name="category">Category</string>
     <string name="condition">Condition</string>
+    <string name="access_library">Allow access to library</string>
+    <string name="access_camera">Allow ccess to camera</string>
+    <string name="privacy">Privacy</string>
+    <string name="account">Account</string>
+    <string name="change_password">Change Password</string>
+    <string name="change_email">Change E-Mail Address</string>
+    <string name="old_password">Old Password</string>
+    <string name="new_password">New Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="save">Save</string>
+    <string name="e_mail_address_of_user">E-Mail Address of User</string>
+    <string name="fault_report">Fault Report</string>
+    <string name="add_reasons">Add reasons</string>
+    <string name="fault_report_question_1">What part of your device broke?</string>
+    <string name="fault_report_question_2">Why did your device broke?</string>
+    <string name="log_out">Log Out</string>
+    <string name="new_condition">New Condition</string>
+    <string name="make_fault_report">Make Fault Report</string>
 </resources>

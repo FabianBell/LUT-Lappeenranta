@@ -15,7 +15,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="40dp">
+            android:padding="50dp">
 
             <EditText
                 android:id="@+id/usernameField"
@@ -42,22 +42,28 @@
                 android:clickable="true"
                 android:text="Forgot Password?" />
 
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:padding="30dp"
-            tools:layout_editor_absoluteX="0dp"
-            tools:layout_editor_absoluteY="190dp">
-
             <Button
                 android:id="@+id/logiInButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:backgroundTint="@color/colorPrimary"
                 android:text="Log In"
                 android:textColorLink="@color/colorPrimary" />
+
+            <Button
+                android:id="@+id/anonymousSignInButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/colorPrimary"
+                android:text="anonymous Sign in" />
+
+            <com.google.android.gms.common.SignInButton
+                android:id="@+id/google_sign_in_button"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+            </com.google.android.gms.common.SignInButton>
 
             <TextView
                 android:id="@+id/signUpLink"
@@ -65,22 +71,11 @@
                 android:layout_height="wrap_content"
                 android:clickable="true"
                 android:gravity="center"
+                android:padding="20dp"
                 android:text="Sign up" />
 
-            <com.google.android.gms.common.SignInButton
-                android:id="@+id/google_sign_in_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="50dp" >
-
-            </com.google.android.gms.common.SignInButton>
-
-            <Button
-                android:id="@+id/anonymousSignInButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="anonymous Sign in" />
         </LinearLayout>
+
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>
