@@ -1,12 +1,10 @@
 package com.fabianbell.janinakeller.lut_lappeenranta;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Environment;
@@ -24,6 +22,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -32,8 +31,7 @@ import android.widget.Toast;
 
 import com.fabianbell.janinakeller.lut_lappeenranta.listener.CallableForFirebase;
 import com.fabianbell.janinakeller.lut_lappeenranta.listener.CallableValueEventListener;
-import com.fabianbell.janinakeller.lut_lappeenranta.listener.FirebaseValueListener;
-import com.fabianbell.janinakeller.lut_lappeenranta.listener.SimpleFirebaseListener;
+import com.fabianbell.janinakeller.lut_lappeenranta.listener.SimpleChildListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
@@ -51,6 +49,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -70,7 +69,7 @@ public class AddDevice extends AppCompatActivity {
     private EditText mDeviceidNumber;
     private EditText mDevicePrice;
     private EditText mDeviceShop;
-    private EditText mDeviceDateOfPurchase;
+    private DatePicker mDeviceDateOfPurchase;
     private Spinner mDeviceCondition;
 
     private ImageView mReceipt;
@@ -94,6 +93,7 @@ public class AddDevice extends AppCompatActivity {
 
     //image
     private String imagePath;
+    private boolean saveImage;
 
     //Adapter
     private ArrayAdapter<String> modelAdapter;
@@ -107,6 +107,7 @@ public class AddDevice extends AppCompatActivity {
     static final int REQUEST_IMAGE_CAPTURE = 1;
     private final int ADD_UNKNOWN_MODEL_QUESTION = 2;
     private final int ADD_UNKNOWN_BRAND_QUESTION = 3;
+    private static final int QUESTION_SAVE_PICTURE = 6;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,15 +121,13 @@ public class AddDevice extends AppCompatActivity {
         mDeviceidNumber = (EditText) findViewById(R.id.deviceidNumber);
         mDevicePrice = (EditText) findViewById(R.id.devicePrice);
         mDeviceShop = (EditText) findViewById(R.id.deviceShop);
-        mDeviceDateOfPurchase = (EditText) findViewById(R.id.deviceDateOfPurchase);
+        mDeviceDateOfPurchase = (DatePicker) findViewById(R.id.deviceDateOfPurchase);
         mDeviceCondition = (Spinner) findViewById(R.id.deviceCondition);
 
         mReceipt = (ImageView) findViewById(R.id.receipt);
 
         mAddReceipt = (Button) findViewById(R.id.addReceipt);
         mAddDeviceButton = (Button) findViewById(R.id.addDeviceButton);
-
-        mUploadBar = (ProgressBar) findViewById(R.id.uploadBar);
 
         mRootRef = new Firebase("https://lut-lappeenranta.firebaseio.com/");
         mAuth = FirebaseAuth.getInstance();
@@ -143,6 +142,11 @@ public class AddDevice extends AppCompatActivity {
         }
 
         //createTestData(mRootRef);
+
+        //set Date
+        Calendar currentDate = Calendar.getInstance();
+        mDeviceDateOfPurchase.updateDate(currentDate.get(Calendar.YEAR), currentDate.get(Calendar.MONTH), currentDate.get(Calendar.DAY_OF_MONTH));
+
 
         brands = new ArrayList<>();
 
@@ -173,8 +177,8 @@ public class AddDevice extends AppCompatActivity {
         mAddDeviceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String brandName = mDeviceBrand.getText().toString();
-                String modelName = mDeviceModel.getText().toString();
+                String brandName = Utils.removeSpace(mDeviceBrand.getText().toString());
+                String modelName = Utils.removeSpace(mDeviceModel.getText().toString());
 
                 //Brand and model upload
                 ArrayList<Object> param = new ArrayList<>();
@@ -197,8 +201,10 @@ public class AddDevice extends AppCompatActivity {
                                     String deviceId = mRootRef.child("Device").push().getKey();
                                     //add model and brand normal
                                     addNormalDeviceData(deviceId);
-                                    addBrandModel(true, true, key, deviceId);
-                                    uploadReciept(deviceId);
+                                    Intent mainIntent = new Intent(AddDevice.this, Main.class);
+                                    Utils.setBrandAndModel(modelName, brandName, deviceId, mainIntent, AddDevice.this);
+                                    //addBrandModel(true, true, key, deviceId);
+                                    uploadReceipt(deviceId);
                                     return;
                                 }
                             }
@@ -240,7 +246,7 @@ public class AddDevice extends AppCompatActivity {
         });
 
         //get categories
-        mRootRef.child("DeviceCategory").addChildEventListener(new SimpleFirebaseListener() {
+        mRootRef.child("DeviceCategory").addChildEventListener(new SimpleChildListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Log.d("Category", "Load Category: " + dataSnapshot.getKey());
@@ -251,7 +257,7 @@ public class AddDevice extends AppCompatActivity {
         });
 
         //get Conditions
-        mRootRef.child("DeviceCondition").addChildEventListener(new SimpleFirebaseListener() {
+        mRootRef.child("DeviceCondition").addChildEventListener(new SimpleChildListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Log.d("Condition", "Load Condition: " + dataSnapshot.getKey());
@@ -262,7 +268,7 @@ public class AddDevice extends AppCompatActivity {
         });
 
         //get brands
-        mRootRef.child("Brand").addChildEventListener(new SimpleFirebaseListener() {
+        mRootRef.child("Brand").addChildEventListener(new SimpleChildListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Log.d("Brands", "Load Brand: " + dataSnapshot.getKey().toString());
@@ -332,7 +338,7 @@ public class AddDevice extends AppCompatActivity {
         String deviceNumber = mDeviceidNumber.getText().toString();
         String price = mDevicePrice.getText().toString();
         String shop = mDeviceShop.getText().toString();
-        String date = mDeviceDateOfPurchase.getText().toString();
+        String date = mDeviceDateOfPurchase.getDayOfMonth() + "." + (mDeviceDateOfPurchase.getMonth() + 1) + "." + mDeviceDateOfPurchase.getYear();
         String condition = mDeviceCondition.getSelectedItem().toString();
 
         Firebase deviceById = mRootRef.child("Device").child(deviceId);
@@ -348,7 +354,7 @@ public class AddDevice extends AppCompatActivity {
         deviceById.child("deviceNumber").setValue(deviceNumber);
     }
 
-    private void uploadReciept(String deviceId){
+    private void uploadReceipt(String deviceId){
 
         //upload receipt
         if (imagePath != null) {
@@ -356,35 +362,24 @@ public class AddDevice extends AppCompatActivity {
             File imageFile = new File(imagePath);
             Uri imageUri = FileProvider.getUriForFile(AddDevice.this, "com.fabianbell.janinakeller.lut_lappeenranta.fileprovider", imageFile);
             uploadTask = imageRef.putFile(imageUri);
-            uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-                    int progress;
-                    if (taskSnapshot.getBytesTransferred() > 0) {
-                        progress = (int) (taskSnapshot.getTotalByteCount() / taskSnapshot.getBytesTransferred() * 100.0f);
-                    }else{
-                        progress = 0;
-                    }
-                    mUploadBar.setProgress(progress);
-                }
-            });
             uploadTask.addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                     if (task.isSuccessful()){
                         Log.d("Receipt", "Uploaded");
                         FirebaseCrash.log("Uploaded");
-                        startActivity(new Intent(AddDevice.this, Main.class));
+                        exit();
                     }else{
                         Log.d("Receipt", "Cannot upload Image > " + task.getException().getMessage());
                         FirebaseCrash.report(task.getException());
+                        exit();
                     }
                 }
             });
         }else {
             Log.d("Receipt", "Upload without Receipt");
             FirebaseCrash.log("Upload without Receipt");
-            startActivity(new Intent(AddDevice.this, Main.class));
+            exit();
         }
     }
 
@@ -393,42 +388,145 @@ public class AddDevice extends AppCompatActivity {
         String modelName = mDeviceModel.getText().toString();
         Firebase deviceByNumber = mRootRef.child("Device").child(deviceId);
 
+        deviceByNumber.child("brandName").setValue(brandName);
+        Log.d("Device", "add brand name");
+        FirebaseCrash.log("add brand name");
+
         if (brandKnown && modelKnown){
             Log.d("Device","Found model key");
             FirebaseCrash.log("Found model key");
-            deviceByNumber.child("brandName").setValue(brandName);
-            Log.d("Device", "add brand name");
-            FirebaseCrash.log("add brand name");
             deviceByNumber.child("modelName").setValue(modelId);
             Log.d("Device", "add model id");
             FirebaseCrash.log("add model id");
         }else{
             if (brandKnown){
-                deviceByNumber.child("brandName").setValue(brandName);
-                Log.d("Device", "add brand name");
-                FirebaseCrash.log("add brand name");
-
                 Firebase brandRef = mRootRef.child("UnknownBrand_Model").child("Brand").child(brandName);
-                String newModelId = brandRef.child("Model").push().getKey();
-                brandRef.child("Model").child(newModelId).setValue(modelName);
-                Log.d("Device", "added unknown model to database");
-                FirebaseCrash.log("added unknown model to database");
-                deviceByNumber.child("modelName").setValue(newModelId);
-                deviceByNumber.child("unknownModel").setValue("true");
-                Log.d("Device", "Model marked as unknown");
-                FirebaseCrash.log("Model marked as unknown");
-            }else{
+                ArrayList<Object> param = new ArrayList<>();
+                param.add(brandRef); //0
+                param.add(modelName); //1
+                param.add(deviceByNumber); //2
+                //get models for brand
+                brandRef.child("Model").addListenerForSingleValueEvent(new CallableValueEventListener<ArrayList<Object>>(param, new CallableForFirebase<ArrayList<Object>>() {
+                    @Override
+                    public void call(ArrayList<Object> param, DataSnapshot data) {
+                        String newModelId = null;
+                        Firebase brandRef = (Firebase) param.get(0);
+                        Firebase deviceByNumber = (Firebase) param.get(2);
+                        Firebase modelRef = null;
+                        //find Model
+                        findModelLoop:
+                        for (DataSnapshot snapshot : data.getChildren()){
+                            for(DataSnapshot entry : snapshot.getChildren()){
+                                if(entry.getKey().equals("Name")){
+                                    if(entry.getValue().toString().equals(param.get(1))){
+                                        //known model > get Key
+                                        Log.d("Save", "Model is known > insert id");
+                                        FirebaseCrash.log("Model is known > insert id");
+                                        newModelId = snapshot.getKey();
+                                        Log.d("Save", "Increase Model usage");
+                                        FirebaseCrash.log("Increase Model usage");
+                                        modelRef = brandRef.child("Model").child(newModelId);
+                                        //increase usage
+                                        brandRef.child("Model").child(newModelId).child("usage").addListenerForSingleValueEvent(new CallableValueEventListener<Firebase>(modelRef, new CallableForFirebase<Firebase>() {
+                                            @Override
+                                            public void call(Firebase param, DataSnapshot data) {
+                                                if(data.getValue() == null){
+                                                    param.child("usage").setValue("1");
+                                                }else{
+                                                    String increment = Integer.toString(Integer.parseInt(data.getValue().toString()) + 1);
+                                                    param.child("usage").setValue(increment);
+                                                }
+                                            }
+                                        }));
+                                        break findModelLoop;
+                                    }
+                                }
+                            }
+                        }
+                        if (newModelId == null){
+                            //new Model
+                            Log.d("Save", "Model is unknown > insern new model");
+                            FirebaseCrash.log("Model is unknown > insern new model");
+                            newModelId = brandRef.child("Model").push().getKey();
+                            modelRef = brandRef.child("Model").child(newModelId);
+                            Firebase usage = modelRef.child("usage");
+                            //set usage to 1
+                            usage.setValue("1");
+                        }
+                        modelRef.child("Name").setValue(param.get(1));
+                        Log.d("Device", "added unknown model to database");
+                        FirebaseCrash.log("added unknown model to database");
+                        deviceByNumber.child("modelName").setValue(newModelId);
+                        deviceByNumber.child("unknownModel").setValue("true");
+                        Log.d("Device", "Model marked as unknown");
+                        FirebaseCrash.log("Model marked as unknown");
+                    }
+                }));
+            }else {
+                //Model is unknown
                 Firebase brandRef = mRootRef.child("UnknownBrand_Model").child("Brand").child(brandName);
-                String newModelId = brandRef.child("Model").push().getKey();
-                brandRef.child("Model").child(newModelId).setValue(modelName);
-                Log.d("Device", "added unknown brand and model to database");
-                FirebaseCrash.log("added unknown brand and model to database");
-                deviceByNumber.child("brandName").setValue(brandName);
-                deviceByNumber.child("unknownBrand").setValue("true");
-                deviceByNumber.child("modelName").setValue(newModelId);
-                deviceByNumber.child("unknownModel").setValue("true");
-                Log.d("Device", "Brand and model marked as unknown");
-                FirebaseCrash.log("Brand and model marked as unknown");
+                ArrayList<Object> param = new ArrayList<>();
+                param.add(brandRef); //0
+                param.add(modelName); //1
+                param.add(deviceByNumber); //2
+                param.add(brandName); //3
+                brandRef.child("Model").addListenerForSingleValueEvent(new CallableValueEventListener<ArrayList<Object>>(param, new CallableForFirebase<ArrayList<Object>>() {
+                    @Override
+                    public void call(ArrayList<Object> param, DataSnapshot data) {
+                        String newModelId = null;
+                        Firebase brandRef = (Firebase) param.get(0);
+                        Firebase deviceByNumber = (Firebase) param.get(2);
+                        Firebase modelRef = null;
+                        findModelLoop:
+                        for (DataSnapshot snapshot : data.getChildren()) {
+                            for (DataSnapshot entry : snapshot.getChildren()) {
+                                if (entry.getKey().equals("Name")) {
+                                    if (entry.getValue().toString().equals(param.get(1))) {
+                                        //known model > get Key
+                                        Log.d("Save", "Model is known > insert id");
+                                        FirebaseCrash.log("Model is known > insert id");
+                                        newModelId = snapshot.getKey();
+                                        Log.d("Save", "Increase Model usage");
+                                        FirebaseCrash.log("Increase Model usage");
+                                        modelRef = brandRef.child("Model").child(newModelId);
+                                        //increase usage
+                                        brandRef.child("Model").child(newModelId).child("usage").addListenerForSingleValueEvent(new CallableValueEventListener<Firebase>(modelRef, new CallableForFirebase<Firebase>() {
+                                            @Override
+                                            public void call(Firebase param, DataSnapshot data) {
+                                                if (data.getValue() == null) {
+                                                    param.child("usage").setValue("1");
+                                                } else {
+                                                    String increment = Integer.toString(Integer.parseInt(data.getValue().toString()) + 1);
+                                                    param.child("usage").setValue(increment);
+                                                }
+                                            }
+                                        }));
+                                        break findModelLoop;
+                                    }
+                                }
+                            }
+                        }
+                        if (newModelId == null) {
+                            //new Model
+                            Log.d("Save", "Model is unknown > insern new model");
+                            FirebaseCrash.log("Model is unknown > insern new model");
+                            newModelId = brandRef.child("Model").push().getKey();
+                            modelRef = brandRef.child("Model").child(newModelId);
+                            Firebase usage = modelRef.child("usage");
+                            //set usage to 1
+                            usage.setValue("1");
+                        }
+                        modelRef.child("Name").setValue(param.get(1));
+                        Log.d("Device", "added unknown brand and model to database");
+                        FirebaseCrash.log("added unknown brand and model to database");
+                        deviceByNumber.child("brandName").setValue(param.get(3));
+                        deviceByNumber.child("unknownBrand").setValue("true");
+                        deviceByNumber.child("modelName").setValue(newModelId);
+                        deviceByNumber.child("unknownModel").setValue("true");
+                        Log.d("Device", "Brand and model marked as unknown");
+                        FirebaseCrash.log("Brand and model marked as unknown");
+                    }
+                }));
             }
         }
     }
@@ -489,6 +587,11 @@ public class AddDevice extends AppCompatActivity {
             Log.d("Receipt", "Took Picture");
             FirebaseCrash.log("Took Picture");
             displayImage();
+            Intent questionIntent = new Intent(AddDevice.this, Question.class);
+            questionIntent.putExtra("QUESTION", "Do you want to save this picture on your device as well?");
+            questionIntent.putExtra("ANSWER1", "Yes");
+            questionIntent.putExtra("ANSWER2", "No");
+            startActivityForResult(questionIntent, QUESTION_SAVE_PICTURE);
         }
         if (requestCode == ADD_UNKNOWN_MODEL_QUESTION && resultCode == RESULT_OK) {
             String answer = data.getStringExtra("ANSWER");
@@ -496,8 +599,12 @@ public class AddDevice extends AppCompatActivity {
             if (answer.equals("1")){
                 String deviceId = mRootRef.child("Device").push().getKey();
                 addNormalDeviceData(deviceId);
-                addBrandModel(true, false, null, deviceId);
-                uploadReciept(deviceId);
+                String modelName = mDeviceModel.getText().toString();
+                String brandName = mDeviceBrand.getText().toString();
+                Intent mainIntent = new Intent(AddDevice.this, Main.class);
+                Utils.setBrandAndModel(modelName, brandName, deviceId, mainIntent, AddDevice.this);
+                //addBrandModel(true, false, null, deviceId);
+                uploadReceipt(deviceId);
                 Log.d("Device", "Saved Device");
                 FirebaseCrash.log("Saved Device");
             }else{
@@ -510,17 +617,35 @@ public class AddDevice extends AppCompatActivity {
             if (answer.equals("1")){
                 String deviceId = mRootRef.child("Device").push().getKey();
                 addNormalDeviceData(deviceId);
-                addBrandModel(false, false, null, deviceId);
-                uploadReciept(deviceId);
+                String modelName = mDeviceModel.getText().toString();
+                String brandName = mDeviceBrand.getText().toString();
+                Intent mainIntent = new Intent(AddDevice.this, Main.class);
+                Utils.setBrandAndModel(modelName, brandName, deviceId, mainIntent, AddDevice.this);
+                //addBrandModel(false, false, null, deviceId);
+                uploadReceipt(deviceId);
                 Log.d("Device", "Saved Device");
                 FirebaseCrash.log("Saved Device");
             }else{
                 Toast.makeText(AddDevice.this, "Please correct your Brand and Model", Toast.LENGTH_LONG).show();
             }
         }
+        if (requestCode == QUESTION_SAVE_PICTURE && resultCode == RESULT_OK) {
+            String answer = data.getStringExtra("ANSWER");
+            if (answer.equals("1")) {
+                Log.d("Reciept", "Save image on device");
+                FirebaseCrash.log("Save image on device");
+                saveImage = true;
+            }else{
+                Log.d("Reciept", "Will not save image on device");
+                FirebaseCrash.log("Will not save image on device");
+                saveImage = false;
+            }
+        }
     }
 
     private void displayImage(){
+        Log.d("Reciept", "Display Reciept");
+        FirebaseCrash.log("Display Reciept");
         BitmapFactory.Options bmOptions = new BitmapFactory.Options();
         bmOptions.inSampleSize= 4;
         Bitmap imageBitmap = BitmapFactory.decodeFile(imagePath, bmOptions);
@@ -528,55 +653,27 @@ public class AddDevice extends AppCompatActivity {
         try {
             exif = new ExifInterface(imagePath);
             int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
-            imageBitmap = rotateBitmap(imageBitmap, orientation);
+            imageBitmap = Utils.rotateBitmap(imageBitmap, orientation);
         } catch (IOException e) {
             Log.d("Receipt", "Cannot find image file");
-            FirebaseCrash.log("Cannot find image file");
+            FirebaseCrash.report(e);
         }
         mReceipt.setImageBitmap(imageBitmap);
     }
 
-    public static Bitmap rotateBitmap(Bitmap bitmap, int orientation) {
-
-        Matrix matrix = new Matrix();
-        switch (orientation) {
-            case ExifInterface.ORIENTATION_NORMAL:
-                return bitmap;
-            case ExifInterface.ORIENTATION_FLIP_HORIZONTAL:
-                matrix.setScale(-1, 1);
-                break;
-            case ExifInterface.ORIENTATION_ROTATE_180:
-                matrix.setRotate(180);
-                break;
-            case ExifInterface.ORIENTATION_FLIP_VERTICAL:
-                matrix.setRotate(180);
-                matrix.postScale(-1, 1);
-                break;
-            case ExifInterface.ORIENTATION_TRANSPOSE:
-                matrix.setRotate(90);
-                matrix.postScale(-1, 1);
-                break;
-            case ExifInterface.ORIENTATION_ROTATE_90:
-                matrix.setRotate(90);
-                break;
-            case ExifInterface.ORIENTATION_TRANSVERSE:
-                matrix.setRotate(-90);
-                matrix.postScale(-1, 1);
-                break;
-            case ExifInterface.ORIENTATION_ROTATE_270:
-                matrix.setRotate(-90);
-                break;
-            default:
-                return bitmap;
-        }
-        try {
-            Bitmap bmRotated = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-            bitmap.recycle();
-            return bmRotated;
-        }
-        catch (OutOfMemoryError e) {
-            e.printStackTrace();
-            return null;
+    private void exit(){
+        if (!saveImage) {
+            if (imagePath != null) {
+                File image = new File(imagePath);
+                boolean isDeletedImage = image.delete();
+                if (isDeletedImage) {
+                    Log.d("receipt", "Deleted receipt from external storage");
+                    FirebaseCrash.log("Deleted receipt from external storage");
+                }
+            } else {
+                Log.d("data", "ImagePath is null but saveImage is not null");
+                FirebaseCrash.report(new Exception("ImagePath is null but saveImage is not null"));
+            }
         }
     }
 

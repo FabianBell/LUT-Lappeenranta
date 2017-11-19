@@ -1,38 +1,28 @@
 package com.fabianbell.janinakeller.lut_lappeenranta;
 
-import android.*;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.FileProvider;
 import android.support.v4.content.PermissionChecker;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.fabianbell.janinakeller.lut_lappeenranta.listener.SimpleFirebaseListener;
-import com.firebase.client.ChildEventListener;
+import com.fabianbell.janinakeller.lut_lappeenranta.listener.SimpleChildListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crash.FirebaseCrash;
 import com.google.firebase.storage.FileDownloadTask;
@@ -94,6 +84,7 @@ public class DeviceDetail extends AppCompatActivity {
         //get Elements
         mEditDeviceButton = (FloatingActionButton) findViewById(R.id.editDeviceButton);
         mRecieptButton = (Button) findViewById(R.id.recieptButton);
+        mDeviceFaultReportButton = (Button) findViewById(R.id.deviceFaultReportButton);
 
         mDownloadBar = (ProgressBar) findViewById(R.id.downloadProgress);
 
@@ -143,13 +134,17 @@ public class DeviceDetail extends AppCompatActivity {
             }
         });
 
-        mRefRoot.child("Device").child(deviceId).addChildEventListener(new SimpleFirebaseListener() {
+        mRefRoot.child("Device").child(deviceId).addChildEventListener(new SimpleChildListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 String key = dataSnapshot.getKey();
                 String value = dataSnapshot.getValue().toString();
                 if (key.equals("brandName")){
-                    mDeviceBrand.setText(value);
+                    String text = mDeviceBrand.getText().toString();
+                    if(text.equals("TextView")){
+                        text = "";
+                    }
+                    mDeviceBrand.setText(value + text);
                 }else{
                     if(key.equals("category")){
                         mDeviceCategory.setText(value);
@@ -161,7 +156,11 @@ public class DeviceDetail extends AppCompatActivity {
                                 mDeviceDate.setText(value);
                             }else{
                                 if(key.equals("modelName")){
-                                    mDeviceModel.setText(deviceModel);
+                                    String text = mDeviceModel.getText().toString();
+                                    if(text.equals("Device Model")){
+                                        text = "";
+                                    }
+                                    mDeviceModel.setText(deviceModel + text);
                                 }else{
                                     if(key.equals("price")){
                                         mDevicePrice.setText(value);
@@ -172,9 +171,16 @@ public class DeviceDetail extends AppCompatActivity {
                                             if(key.equals("deviceNumber")){
                                                 mDeviceNumber.setText(value);
                                             }else {
-                                                //todo display unknown model or brand
-                                                Log.e("deviceData", "Cannot categorize Data with key: " + key);
-                                                FirebaseCrash.log("Cannot categorize Data with key: " + key);
+                                                if(key.equals("unknownModel")){
+                                                    mDeviceModel.setText(mDeviceModel.getText().toString() + " (unknown)");
+                                                }else {
+                                                    if (key.equals("unknownBrand")){
+                                                        mDeviceBrand.setText(mDeviceBrand.getText().toString() + " (unknown)");
+                                                    }else {
+                                                        Log.e("deviceData", "Cannot categorize Data with key: " + key);
+                                                        FirebaseCrash.log("Cannot categorize Data with key: " + key);
+                                                    }
+                                                }
                                             }
                                         }
                                     }

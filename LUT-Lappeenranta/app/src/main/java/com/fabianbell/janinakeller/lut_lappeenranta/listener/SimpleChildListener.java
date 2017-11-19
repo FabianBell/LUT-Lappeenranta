@@ -11,7 +11,7 @@ import com.google.firebase.crash.FirebaseCrash;
  * Created by Fabian on 13.11.2017.
  */
 
-public abstract class SimpleFirebaseListener implements ChildEventListener {
+public abstract class SimpleChildListener implements ChildEventListener {
 
     @Override
     public void onChildChanged(DataSnapshot dataSnapshot, String s) {

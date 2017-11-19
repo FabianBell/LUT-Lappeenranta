@@ -27,25 +27,19 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent">
 
-                <EditText
+                <AutoCompleteTextView
                     android:id="@+id/deviceModel"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:ems="10"
-                    android:hint="@string/model_name"
-                    android:inputType="text" />
+                    android:hint="@string/model_name" />
 
-                <EditText
+                <AutoCompleteTextView
                     android:id="@+id/deviceBrand"
-                    style="@style/Widget.AppCompat.AutoCompleteTextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:ems="10"
-                    android:hint="@string/brand"
-                    android:inputType="text"
-                    android:selectAllOnFocus="false" />
+                    android:hint="@string/brand" />
 
                 <EditText
                     android:id="@+id/deviceIDNumber"
@@ -74,14 +68,28 @@
                     android:hint="@string/shop"
                     android:inputType="text" />
 
-                <EditText
-                    android:id="@+id/deviceDateOfPurchase"
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:ems="10"
-                    android:hint="@string/date_of_purchase"
-                    android:inputType="date" />
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/date_of_purchase"
+                        android:textAlignment="center"
+                        android:textSize="18sp" />
+
+                    <DatePicker
+                        android:id="@+id/deviceDateOfPurchase"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:calendarViewShown="false"
+                        android:datePickerMode="spinner" />
+                </LinearLayout>
 
                 <Spinner
                     android:id="@+id/deviceCondition"
@@ -91,7 +99,7 @@
                     android:tooltipText="Condition" />
 
                 <ImageView
-                    android:id="@+id/imageView"
+                    android:id="@+id/recieptThumbnail"
                     android:layout_width="match_parent"
                     android:layout_height="87dp"
                     android:layout_weight="1"
@@ -102,14 +110,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Add Receipt" />
-
-                <ProgressBar
-                    android:id="@+id/uploadReceiptProgressBar"
-                    style="?android:attr/progressBarStyleHorizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1" />
+                    android:text="Add Receipt/ Change Reciept" />
 
             </LinearLayout>
 
