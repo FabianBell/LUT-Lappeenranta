@@ -2,9 +2,13 @@
     <string name="app_name">LUT-Lappeenranta</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_main">Main</string>
+    <string name="go_back">Go Back</string>
+    <string name="statistics">Statistics</string>
     <string name="section_format">Hello World from section: %1$d</string>
     <string name="model_name">Model Name</string>
+    <string name="models">Models</string>
     <string name="brand">Brand</string>
+    <string name="brands">Brands</string>
     <string name="id_number">ID Number</string>
     <string name="price">Price</string>
     <string name="shop">Shop</string>
@@ -21,12 +25,18 @@
     <string name="new_password">New Password</string>
     <string name="confirm_password">Confirm Password</string>
     <string name="save">Save</string>
+    <string name="save_and_delete">Save and Delete Device</string>
     <string name="e_mail_address_of_user">E-Mail Address of User</string>
     <string name="fault_report">Fault Report</string>
+    <string name="fault_reports">Fault Reports</string>
     <string name="add_reasons">Add reasons</string>
     <string name="fault_report_question_1">What part of your device broke?</string>
     <string name="fault_report_question_2">Why did your device broke?</string>
+    <string name="fault_report_question_3">Did the device still have garanty? If yes, did it help to get the device fixed?</string>
     <string name="log_out">Log Out</string>
     <string name="new_condition">New Condition</string>
     <string name="make_fault_report">Make Fault Report</string>
+    <string name="statistics_titel_question">What kind of statistics do you want to see?</string>
+    <string name="search">Search</string>
+    <string name="see_fault_reports">See Fault Reports</string>
 </resources>

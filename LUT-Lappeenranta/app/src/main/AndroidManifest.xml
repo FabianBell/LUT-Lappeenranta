@@ -40,10 +40,10 @@
         <activity android:name=".EditProfile" />
         <activity android:name=".DeviceDetail" />
         <activity android:name=".EditDevice" />
-        <activity android:name=".ChangePassword"/>
-        <activity android:name=".Question"/>
-        <activity android:name=".FaultReport"/>
-        <activity android:name=".Settings"/>
+        <activity android:name=".ChangePassword" />
+        <activity android:name=".Question" />
+        <activity android:name=".FaultReport" />
+        <activity android:name=".Settings" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -55,7 +55,8 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-
+        <activity android:name=".Statistics" />
+        <activity android:name=".StatisticFaultReports"></activity>
     </application>
 
 </manifest>
