@@ -16,6 +16,7 @@ import android.widget.TextView;
 import com.fabianbell.janinakeller.lut_lappeenranta.listener.CallableForFirebase;
 import com.fabianbell.janinakeller.lut_lappeenranta.listener.CallableValueEventListener;
 import com.fabianbell.janinakeller.lut_lappeenranta.listener.SimpleChildListener;
+import com.fabianbell.janinakeller.lut_lappeenranta.listener.SimpleValueListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.google.firebase.auth.FirebaseAuth;
@@ -84,7 +85,14 @@ public class Main extends AppCompatActivity {
         mProfileLogOutButton = (Button) findViewById(R.id.profileLougOutButton);
         mEditProfileButton = (FloatingActionButton) findViewById(R.id.editProfileButton);
 
-        // TODO Fabian display user email and number of devices
+        //set fields
+        mProfileEmailTextView.setText(mAuth.getCurrentUser().getEmail());
+        mRootRef.child("User").child(mAuth.getCurrentUser().getUid()).child("Devices").addListenerForSingleValueEvent(new SimpleValueListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                mProfileNumberOfDevices.setText(Long.toString(dataSnapshot.getChildrenCount()));
+            }
+        });
 
         mProfileLogOutButton.setOnClickListener(new View.OnClickListener() {
             @Override
