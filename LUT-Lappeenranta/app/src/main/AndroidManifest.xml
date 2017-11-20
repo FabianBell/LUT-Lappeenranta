@@ -56,7 +56,8 @@
         </provider>
 
         <activity android:name=".Statistics" />
-        <activity android:name=".StatisticFaultReports"></activity>
+        <activity android:name=".StatisticFaultReports" />
+        <activity android:name=".RefreshLogin"></activity>
     </application>
 
 </manifest>

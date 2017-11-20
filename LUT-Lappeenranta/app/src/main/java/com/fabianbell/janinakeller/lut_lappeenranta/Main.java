@@ -23,6 +23,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.crash.FirebaseCrash;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,6 +41,7 @@ public class Main extends AppCompatActivity {
     //Profile Elements
     private TextView mProfileEmailTextView;
     private TextView mProfileNumberOfDevices;
+    private TextView mDevicesText;
 
     private Button mProfileLogOutButton;
     private FloatingActionButton mEditProfileButton;
@@ -78,10 +81,16 @@ public class Main extends AppCompatActivity {
         spec3.setIndicator("Profile");
         host.addTab(spec3);
 
+        String tag = getIntent().getStringExtra("TAG");
+        if (tag != null) {
+            host.setCurrentTabByTag(tag);
+        }
+
         ///////////////////////////////////// Profile //////////////////////////////////////
 
         mProfileEmailTextView = (TextView) findViewById(R.id.profileEmailTextView);
         mProfileNumberOfDevices = (TextView) findViewById(R.id.profileNumberOfDevices);
+        mDevicesText = findViewById(R.id.DevicesTextView);
         mProfileLogOutButton = (Button) findViewById(R.id.profileLougOutButton);
         mEditProfileButton = (FloatingActionButton) findViewById(R.id.editProfileButton);
 
@@ -90,9 +99,15 @@ public class Main extends AppCompatActivity {
         mRootRef.child("User").child(mAuth.getCurrentUser().getUid()).child("Devices").addListenerForSingleValueEvent(new SimpleValueListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                mProfileNumberOfDevices.setText(Long.toString(dataSnapshot.getChildrenCount()));
+                long count = dataSnapshot.getChildrenCount();
+                if (count == 1){
+                    mDevicesText.setText("Device");
+                }
+                mProfileNumberOfDevices.setText(Long.toString(count));
             }
         });
+
+        currentUser = mAuth.getCurrentUser();
 
         mProfileLogOutButton.setOnClickListener(new View.OnClickListener() {
             @Override

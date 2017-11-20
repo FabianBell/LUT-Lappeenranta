@@ -5,13 +5,20 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.fabianbell.janinakeller.lut_lappeenranta.listener.CallableForFirebase;
 import com.fabianbell.janinakeller.lut_lappeenranta.listener.CallableValueEventListener;
+import com.fabianbell.janinakeller.lut_lappeenranta.listener.SimpleValueListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.crash.FirebaseCrash;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -254,5 +261,38 @@ public class Utils {
             data.substring(data.length()-1);
         }
         return data;
+    }
+
+    public static void deleteDevice(String deviceId, String userId) {
+        final Firebase mRootRef = new Firebase("https://lut-lappeenranta.firebaseio.com/");
+        final StorageReference storage = FirebaseStorage.getInstance().getReference().child("User_receipt");
+        final Firebase userDeviceRef = mRootRef.child("User").child(userId).child("Devices").child(deviceId);
+        Log.d("DeleteDevice", "start deleting device");
+        FirebaseCrash.log("start deleting device");
+        mRootRef.child("Device").child(deviceId).setValue(null);
+        userDeviceRef.setValue(null);
+        //check for receipt
+        storage.child(userId + "_" + deviceId + ".jpg").delete().addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                if (!e.getMessage().equals("Object does not exist at location.")) {
+                    Log.d("DeleteDevice", "Cannot delete receipt");
+                    FirebaseCrash.report(e);
+                }
+            }
+        });
+        storage.child("thumb_" + userId + "_" + deviceId + ".jpg").delete().addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                if (!e.getMessage().equals("Object does not exist at location.")) {
+                    Log.d("DeleteDevice", "Cannot delete thumbnail");
+                    FirebaseCrash.report(e);
+                }
+            }
+        });
+        Log.d("DeleteDevice", "Delete device completely");
+        FirebaseCrash.log("Delete device completely");
+
+
     }
 }

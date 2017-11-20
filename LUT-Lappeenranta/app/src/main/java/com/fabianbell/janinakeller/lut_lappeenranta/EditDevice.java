@@ -667,12 +667,7 @@ public class EditDevice extends AppCompatActivity {
                 Log.d("question", "FaultReport");
                 //todo connect to fault report
             }else{
-                Log.d("delete", "start deleting device");
-                FirebaseCrash.log("start deleting device");
-                mRootRef.child("Device").child(deviceId).setValue(null);
-                mRootRef.child("User").child(mAuth.getCurrentUser().getUid()).child("Devices").child(deviceId).setValue(null);
-                Log.d("delte","device deleted");
-                FirebaseCrash.log("device deleted");
+                Utils.deleteDevice(deviceId, mAuth.getCurrentUser().getUid());
                 Intent mainIntent = new Intent(EditDevice.this, Main.class);
                 exit();
                 startActivity(mainIntent);
