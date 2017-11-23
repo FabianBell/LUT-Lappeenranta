@@ -105,4 +105,9 @@ public class BetterDay {
     public void setYear(int year) {
         this.year = year;
     }
+
+    public long getTotalDays(){
+        long days = ((long) this.year) * 365 + this.month * 30 + this.day;
+        return days;
+    }
 }

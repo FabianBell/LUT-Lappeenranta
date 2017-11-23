@@ -146,7 +146,8 @@ public class FaultReport extends AppCompatActivity {
         if (dateOfFault.before(dateOfPurchase)){
             Toast.makeText(FaultReport.this, "You bougth this device after the given day of the fault", Toast.LENGTH_LONG).show();
         }else{
-            String lifetime = dateOfFault.diff(dateOfPurchase).print();
+            BetterDay diffLifetime = dateOfFault.diff(dateOfPurchase);
+            String lifetime = Long.toString(diffLifetime.getTotalDays());
 
             //insertData
             Firebase reportRef = mRootRef.child("FaultReport").child(deviceData.get("modelId")).child(reportId);

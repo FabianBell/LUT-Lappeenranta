@@ -8,24 +8,19 @@ import android.media.ExifInterface;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.bumptech.glide.util.Util;
 import com.fabianbell.janinakeller.lut_lappeenranta.listener.CallableForFirebase;
 import com.fabianbell.janinakeller.lut_lappeenranta.listener.CallableValueEventListener;
+import com.fabianbell.janinakeller.lut_lappeenranta.listener.DataAdapter;
 import com.fabianbell.janinakeller.lut_lappeenranta.listener.SimpleValueListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.crash.FirebaseCrash;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Map;
-
-import com.fabianbell.janinakeller.lut_lappeenranta.listener.DataAdapter;
 
 /**
  * Created by Fabian on 18.11.2017.
