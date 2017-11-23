@@ -8,6 +8,7 @@ import android.media.ExifInterface;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.bumptech.glide.util.Util;
 import com.fabianbell.janinakeller.lut_lappeenranta.listener.CallableForFirebase;
 import com.fabianbell.janinakeller.lut_lappeenranta.listener.CallableValueEventListener;
 import com.fabianbell.janinakeller.lut_lappeenranta.listener.SimpleValueListener;
@@ -24,11 +25,15 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 
+import com.fabianbell.janinakeller.lut_lappeenranta.listener.DataAdapter;
+
 /**
  * Created by Fabian on 18.11.2017.
  */
 
 public class Utils {
+
+    private static Firebase mRootRef = new Firebase("https://lut-lappeenranta.firebaseio.com/");
 
     public static Bitmap rotateBitmap(Bitmap bitmap, int orientation) {
 
@@ -81,7 +86,6 @@ public class Utils {
     public static void setBrandAndModel(String modelName, String brandName, String deviceId, Intent afterDataChange, Activity context){
         final Intent finalChange = afterDataChange;
         final Activity finalContext = context;
-        Firebase mRootRef = mRootRef = new Firebase("https://lut-lappeenranta.firebaseio.com/");
         Firebase device = mRootRef.child("Device").child(deviceId);
 
         device.child("brandName").setValue(brandName);
@@ -294,5 +298,39 @@ public class Utils {
         FirebaseCrash.log("Delete device completely");
 
 
+    }
+
+    public static void getDeviceData(String deviceId, final DataAdapter<Map<String, String>> dataAdapter){
+        mRootRef.child("Device").child(deviceId).addListenerForSingleValueEvent(new SimpleValueListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                final Map<String, String> deviceData = dataSnapshot.getValue(Map.class);
+                if(deviceData.containsKey("unknownBrand") || deviceData.containsKey("unknownModel")){
+                    Log.d("data", "unknownModel or unknownBrand > serach for model name in unknown data");
+                    FirebaseCrash.log("unknownModel or unknownBrand > serach for model name in unknown data");
+                    mRootRef.child("UnknownBrand_Model").child("Brand").child(deviceData.get("brandName")).child("Model").child(deviceData.get("modelName")).child("Name").addListenerForSingleValueEvent(new SimpleValueListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            String modelId = deviceData.get("modelName");
+                            deviceData.put("modelName", dataSnapshot.getValue().toString());
+                            deviceData.put("modelId", modelId);
+                            dataAdapter.onLoad(deviceData);
+                        }
+                    });
+                }else{
+                    Log.d("data", "model known > search model name");
+                    FirebaseCrash.log("model known > search model name");
+                    mRootRef.child("Brand").child(deviceData.get("brandName")).child("Model").child(deviceData.get("modelName")).addListenerForSingleValueEvent(new SimpleValueListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            String modelId = deviceData.get("modelName");
+                            deviceData.put("modelName", dataSnapshot.getValue().toString());
+                            deviceData.put("modelId", modelId);
+                            dataAdapter.onLoad(deviceData);
+                        }
+                    });
+                }
+            }
+        });
     }
 }

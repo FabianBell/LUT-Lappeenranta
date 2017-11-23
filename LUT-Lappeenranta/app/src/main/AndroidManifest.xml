@@ -43,7 +43,6 @@
         <activity android:name=".ChangePassword" />
         <activity android:name=".Question" />
         <activity android:name=".FaultReport" />
-        <activity android:name=".Settings" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"

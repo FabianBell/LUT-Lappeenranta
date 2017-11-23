@@ -503,7 +503,6 @@ public class EditDevice extends AppCompatActivity {
                                     mDeviceShop.setText(data.get("shop"));
                                     String[] date = data.get("date").split("\\.");
                                     mDeviceDateOfPurchase.updateDate(Integer.parseInt(date[2]), Integer.parseInt(date[1]) - 1, Integer.parseInt(date[0]));
-
                                     //get Conditions
                                     mRootRef.child("DeviceCondition").addChildEventListener(new SimpleChildListener() {
                                         @Override
