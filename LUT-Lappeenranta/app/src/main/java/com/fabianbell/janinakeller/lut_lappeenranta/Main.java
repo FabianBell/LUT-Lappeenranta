@@ -226,7 +226,6 @@ public class Main extends AppCompatActivity {
                 String deviceId = deviceIdMap.get(deviceModel);
                 Log.d("ListElement", "Number: " + deviceId);
                 intent.putExtra("DeviceId", deviceId);
-                intent.putExtra("DeviceModel", deviceModel);
                 startActivity(intent);
             }
         });

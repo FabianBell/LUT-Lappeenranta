@@ -18,6 +18,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fabianbell.janinakeller.lut_lappeenranta.listener.DataAdapter;
 import com.fabianbell.janinakeller.lut_lappeenranta.listener.SimpleChildListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
@@ -34,6 +35,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 
 public class DeviceDetail extends AppCompatActivity {
 
@@ -58,7 +60,7 @@ public class DeviceDetail extends AppCompatActivity {
 
     //device
     private String deviceId;
-    private String deviceModel;
+    private Map<String, String> deviceData;
 
     private TextView mDeviceModel;
     private TextView mDeviceCategory;
@@ -78,7 +80,6 @@ public class DeviceDetail extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
 
         deviceId = getIntent().getStringExtra("DeviceId");
-        deviceModel = getIntent().getStringExtra("DeviceModel");
         storageReference = FirebaseStorage.getInstance().getReference().child("User_receipt").child(mAuth.getCurrentUser().getUid() + "_" + deviceId + ".jpg" );
 
         //get Elements
@@ -93,9 +94,9 @@ public class DeviceDetail extends AppCompatActivity {
         mDeviceBrand = (TextView) findViewById(R.id.DeviceDetailBrand);
         mDeviceNumber = (TextView) findViewById(R.id.DeviceDetailNumber);
         mDevicePrice = (TextView) findViewById(R.id.DeviceDetailPrice);
-        mDeviceShop = (TextView) findViewById(R.id.DeviceDetailShop);
-        mDeviceDate = (TextView) findViewById(R.id.DeviceDetailDate);
-        mDeviceCondition = (TextView) findViewById(R.id.DeviceDetailCondition);
+        mDeviceShop = findViewById(R.id.DeviceDetailShop);
+        mDeviceDate = findViewById(R.id.DeviceDetailDate);
+        mDeviceCondition = findViewById(R.id.DeviceDetailCondition);
 
 
         mDeviceFaultReportButton.setOnClickListener(new View.OnClickListener() {
@@ -134,51 +135,46 @@ public class DeviceDetail extends AppCompatActivity {
             }
         });
 
-        mRefRoot.child("Device").child(deviceId).addChildEventListener(new SimpleChildListener() {
+        Utils.getDeviceData(deviceId, new DataAdapter<Map<String, String>>() {
             @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                String key = dataSnapshot.getKey();
-                String value = dataSnapshot.getValue().toString();
-                if (key.equals("brandName")){
-                    String text = mDeviceBrand.getText().toString();
-                    if(text.equals("TextView")){
-                        text = "";
-                    }
-                    mDeviceBrand.setText(value + text);
-                }else{
-                    if(key.equals("category")){
-                        mDeviceCategory.setText(value);
+            public void onLoad(Map<String, String> Data) {
+                deviceData = Data;
+                for (Map.Entry<String, String> entry : deviceData.entrySet()){
+                    String key = entry.getKey();
+                    String value = entry.getValue();
+                    if (key.equals("brandName")){
+                        mDeviceBrand.setText(value);
                     }else{
-                        if(key.equals("condition")){
-                            mDeviceCondition.setText(value);
+                        if(key.equals("category")){
+                            mDeviceCategory.setText(value);
                         }else{
-                            if(key.equals("date")){
-                                mDeviceDate.setText(value);
+                            if(key.equals("condition")){
+                                mDeviceCondition.setText(value);
                             }else{
-                                if(key.equals("modelName")){
-                                    String text = mDeviceModel.getText().toString();
-                                    if(text.equals("Device Model")){
-                                        text = "";
-                                    }
-                                    mDeviceModel.setText(deviceModel + text);
+                                if(key.equals("date")){
+                                    mDeviceDate.setText(value);
                                 }else{
-                                    if(key.equals("price")){
-                                        mDevicePrice.setText(value);
+                                    if(key.equals("modelName")){
+                                        mDeviceModel.setText(value);
                                     }else{
-                                        if(key.equals("shop")){
-                                            mDeviceShop.setText(value);
+                                        if(key.equals("price")){
+                                            mDevicePrice.setText(value);
                                         }else{
-                                            if(key.equals("deviceNumber")){
-                                                mDeviceNumber.setText(value);
-                                            }else {
-                                                if(key.equals("unknownModel")){
-                                                    mDeviceModel.setText(mDeviceModel.getText().toString() + " (unknown)");
+                                            if(key.equals("shop")){
+                                                mDeviceShop.setText(value);
+                                            }else{
+                                                if(key.equals("deviceNumber")){
+                                                    mDeviceNumber.setText(value);
                                                 }else {
-                                                    if (key.equals("unknownBrand")){
-                                                        mDeviceBrand.setText(mDeviceBrand.getText().toString() + " (unknown)");
+                                                    if(key.equals("unknownModel")){
+                                                        mDeviceModel.setText(mDeviceModel.getText().toString() + " (unknown)");
                                                     }else {
-                                                        Log.e("deviceData", "Cannot categorize Data with key: " + key);
-                                                        FirebaseCrash.log("Cannot categorize Data with key: " + key);
+                                                        if (key.equals("unknownBrand")){
+                                                            mDeviceBrand.setText(mDeviceBrand.getText().toString() + " (unknown)");
+                                                        }else {
+                                                            Log.e("deviceData", "Cannot categorize Data with key: " + key);
+                                                            FirebaseCrash.log("Cannot categorize Data with key: " + key);
+                                                        }
                                                     }
                                                 }
                                             }
@@ -191,8 +187,6 @@ public class DeviceDetail extends AppCompatActivity {
                 }
             }
         });
-
-
     }
 
     private File createImageFile() throws IOException {
