@@ -46,40 +46,29 @@
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:orientation="vertical"
-                            android:padding="10dp">
+                            android:padding="20dp">
 
-                            <Button
-                                android:id="@+id/statisticsBrandsButton"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="0"
-                                android:backgroundTint="@color/colorPrimary"
-                                android:text="@string/brands" />
-
-                            <TextView
-                                android:id="@+id/statisticsChosenBrands"
+                            <Spinner
+                                android:id="@+id/statisticsCategorySpinner"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_margin="10dp"
                                 android:layout_weight="0"
-                                android:text="Brands" />
+                                android:backgroundTint="@color/colorPrimaryDark"
+                                android:foregroundTint="@color/colorPrimary" />
 
-                            <Button
-                                android:id="@+id/statisticsModelButton"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="20dp"
-                                android:layout_weight="0"
-                                android:backgroundTint="@color/colorPrimary"
-                                android:text="@string/models" />
-
-                            <TextView
-                                android:id="@+id/statisticsChosenModels"
+                            <MultiAutoCompleteTextView
+                                android:id="@+id/statisticsBrandsAutoComplete"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_margin="10dp"
                                 android:layout_weight="0"
-                                android:text="@string/models" />
+                                android:hint="@string/brands" />
+
+                            <MultiAutoCompleteTextView
+                                android:id="@+id/statisticsModelsAutoComplete"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="0"
+                                android:hint="@string/models" />
 
                             <LinearLayout
                                 android:layout_width="match_parent"
@@ -89,7 +78,7 @@
                                 android:padding="50dp">
 
                                 <Button
-                                    android:id="@+id/button4"
+                                    android:id="@+id/statisticsSearchButton"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:backgroundTint="@color/colorPrimary"

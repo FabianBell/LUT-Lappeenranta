@@ -55,7 +55,6 @@
                     android:id="@+id/statisticBarChart"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:backgroundTint="@color/colorPrimary"
                     android:foregroundTint="@color/colorPrimary"></com.github.mikephil.charting.charts.BarChart>
 
             </LinearLayout>
