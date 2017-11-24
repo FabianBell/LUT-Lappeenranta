@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center_vertical|center_horizontal|center"
+    android:foregroundGravity="center_vertical|center_horizontal|center"
+    app:layout_anchorGravity="center_vertical|center_horizontal|center"
+    tools:context="com.fabianbell.janinakeller.lut_lappeenranta.LoadingScreen">
+
+    <LinearLayout
+        android:layout_width="383dp"
+        android:layout_height="507dp"
+        android:foregroundGravity="center_vertical|center_horizontal|center"
+        android:gravity="center_vertical|center_horizontal|center"
+        android:orientation="vertical">
+
+        <ProgressBar
+            android:id="@+id/loadingProcessBar"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_gravity="center_vertical|center_horizontal|center" />
+
+        <TextView
+            android:id="@+id/loadingTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|center_horizontal|center"
+            android:text="@string/loading" />
+    </LinearLayout>
+</android.support.constraint.ConstraintLayout>
