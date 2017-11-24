@@ -7,17 +7,21 @@ admin.initializeApp(functions.config().firebase)
 
 const ref = admin.database().ref()
 
-exports.test = functions.https.onRequest((req, res) => {
-	ref.child('Device').orderByChild('brandName').once('value')
+exports.updateStatistics = functions.https.onRequest((req, res) => {
+	ref.child('FaultReport').once('value')
 	.then(snap => {
-		const  brands = []
-		snap.forEach(childSnap => {
-			const brand = childSnap.val().brandName
-			brands.push(brand)
+		snap.forEach(modelSnap => {
+			modelId = modelSnap.key
+			lifetimeTotal = 0
+			count = modelSnap.numChildren()
+			modelSnap.forEach(faultsnap => {
+				lifetimeTotal += parseInt(faultsnap.val().Lifetime)
+			})
+			lifetimeAverage = Math.round(lifetimeTotal / count)
+			console.log('modelId: ' + modelId + ' - lifetime: ' + lifetimeAverage)
+			ref.child('Statistics').child('Models').child(modelId).set(lifetimeAverage)
 		})
-		res.send('Antwort: ' + brands)
-	}).catch(error => {
-		res.send(error)
+		res.send('fin')
 	})
 })
 
