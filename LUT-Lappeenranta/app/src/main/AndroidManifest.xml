@@ -56,7 +56,8 @@
 
         <activity android:name=".Statistics" />
         <activity android:name=".StatisticFaultReports" />
-        <activity android:name=".RefreshLogin"></activity>
+        <activity android:name=".RefreshLogin" />
+        <activity android:name=".LoadingScreen"></activity>
     </application>
 
 </manifest>
