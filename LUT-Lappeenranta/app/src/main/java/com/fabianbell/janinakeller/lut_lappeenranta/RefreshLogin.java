@@ -158,7 +158,7 @@ public class RefreshLogin extends AppCompatActivity implements GoogleApiClient.O
         }
     }
 
-    //gives the user data to the normal authantification system
+    //gives the user lifetimeData to the normal authantification system
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
         Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
 

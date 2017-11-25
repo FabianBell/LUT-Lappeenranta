@@ -38,7 +38,7 @@
                     android:text="@string/brands" />
 
                 <TextView
-                    android:id="@+id/textView4"
+                    android:id="@+id/statisticsModelsTextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
@@ -54,7 +54,7 @@
                 <com.github.mikephil.charting.charts.BarChart
                     android:id="@+id/statisticBarChart"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="1000dp"
                     android:foregroundTint="@color/colorPrimary"></com.github.mikephil.charting.charts.BarChart>
 
             </LinearLayout>

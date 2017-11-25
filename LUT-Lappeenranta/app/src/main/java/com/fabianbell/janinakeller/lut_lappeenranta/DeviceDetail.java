@@ -13,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -168,6 +169,7 @@ public class DeviceDetail extends AppCompatActivity {
                                                 }else {
                                                     if(key.equals("unknownModel")){
                                                         mDeviceModel.setText(mDeviceModel.getText().toString() + " (unknown)");
+                                                        ((ViewGroup) mDeviceFaultReportButton.getParent()).removeView(mDeviceFaultReportButton);
                                                     }else {
                                                         if (key.equals("unknownBrand")){
                                                             mDeviceBrand.setText(mDeviceBrand.getText().toString() + " (unknown)");

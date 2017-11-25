@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -14,13 +16,20 @@ import android.widget.MultiAutoCompleteTextView;
 import android.widget.Spinner;
 import android.widget.TabHost;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.fabianbell.janinakeller.lut_lappeenranta.listener.Callable;
 import com.fabianbell.janinakeller.lut_lappeenranta.listener.CallableForFirebase;
 import com.fabianbell.janinakeller.lut_lappeenranta.listener.CallableValueEventListener;
+import com.fabianbell.janinakeller.lut_lappeenranta.listener.Condition;
+import com.fabianbell.janinakeller.lut_lappeenranta.listener.Counter;
 import com.fabianbell.janinakeller.lut_lappeenranta.listener.SimpleChildListener;
 import com.fabianbell.janinakeller.lut_lappeenranta.listener.SimpleValueListener;
+import com.fabianbell.janinakeller.lut_lappeenranta.listener.Trigger;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.crash.FirebaseCrash;
@@ -62,6 +71,9 @@ public class Main extends AppCompatActivity {
     private MultiAutoCompleteTextView mStatisticsBrandsAutoComplete;
     private MultiAutoCompleteTextView mStatisticsModelsAutoComplete;
     private Button mStatisticsSearchButton;
+    private boolean brandChanged;
+    private Map<String, ArrayList<String>> brandModelMap;
+    private Map<String, String> modelMap;
 
     //autocomplete
     private ArrayList<String> brands;
@@ -71,7 +83,6 @@ public class Main extends AppCompatActivity {
 
     //Adapter
     private ArrayAdapter<String> modelAdapter;
-    private Map<String, String> modelMap;
     private ArrayAdapter<String> categoryAdapter;
     private ArrayAdapter<String> conditionAdapter;
     private ArrayAdapter<String> brandAdapter;
@@ -122,172 +133,304 @@ public class Main extends AppCompatActivity {
         conditionAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, condition);
         mStatisticsCategorySpinner.setAdapter(conditionAdapter);
 
-        //get categories
-        mRootRef.child("DeviceCategory").addChildEventListener(new SimpleChildListener() {
+        brands = new ArrayList<>();
+        brandAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, brands);
+        mStatisticsBrandsAutoComplete.setAdapter(brandAdapter);
+        mStatisticsBrandsAutoComplete.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
+
+        modelOfBrand = new ArrayList<>();
+        modelAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, modelOfBrand);
+        mStatisticsModelsAutoComplete.setAdapter(modelAdapter);
+        mStatisticsModelsAutoComplete.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
+
+        //get brands
+        mRootRef.child("Brand").addChildEventListener(new SimpleChildListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Log.d("Category", "Load Category: " + dataSnapshot.getKey());
-                FirebaseCrash.log("Load Category: " + dataSnapshot.getKey());
-                categories.add(dataSnapshot.getKey());
-                categoryAdapter.notifyDataSetChanged();
+                Log.d("Brands", "Load Brand: " + dataSnapshot.getKey().toString());
+                FirebaseCrash.log("Load Brand: " + dataSnapshot.getKey().toString());
+                brands.add(dataSnapshot.getKey());
+                brandAdapter.notifyDataSetChanged();
+            }
+        });
 
-                //TODO AutoComplete Models, Brands,Category
-                mStatisticsSearchButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent intent = new Intent(Main.this, Statistics.class);
-                        intent.putExtra("Category", "mStatisticsCategorySpinner");
-                        intent.putExtra("Brands", "mStatisticsBrandsAutoComplete");
-                        intent.putExtra("Models", "mStatisticsModelsAutoComplete");
+        //only update model if brand was changed
+        mStatisticsBrandsAutoComplete.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-                    }
-                });
+            }
 
-                ///////////////////////////////////// Profile //////////////////////////////////////
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
 
-                mProfileEmailTextView = (TextView) findViewById(R.id.profileEmailTextView);
-                mProfileNumberOfDevices = (TextView) findViewById(R.id.profileNumberOfDevices);
-                mDevicesText = findViewById(R.id.DevicesTextView);
-                mProfileLogOutButton = (Button) findViewById(R.id.profileLougOutButton);
-                mEditProfileButton = (FloatingActionButton) findViewById(R.id.editProfileButton);
+            }
 
-                //set fields
-                mProfileEmailTextView.setText(mAuth.getCurrentUser().getEmail());
-                mRootRef.child("User").child(mAuth.getCurrentUser().getUid()).child("Devices").addListenerForSingleValueEvent(new SimpleValueListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        long count = dataSnapshot.getChildrenCount();
-                        if (count == 1) {
-                            mDevicesText.setText("Device");
+            @Override
+            public void afterTextChanged(Editable s) {
+                brandChanged = true;
+                Log.d("Model", "Brand changed");
+                FirebaseCrash.log("Brand changed");
+            }
+        });
+        mStatisticsModelsAutoComplete.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (brandChanged) {
+                    modelOfBrand.removeAll(modelOfBrand);
+                    modelAdapter.notifyDataSetChanged();
+                    modelMap = new HashMap<>();
+                    Log.d("Model", "Models clear");
+                    FirebaseCrash.log("Models clear");
+                    String[] uncleanedBrandList = mStatisticsBrandsAutoComplete.getText().toString().split(",");
+                    ArrayList<String> brandList = new ArrayList<>();
+                    String cleanedBrand;
+                    for (String brand : uncleanedBrandList){
+                        cleanedBrand = Utils.removeSpace(brand);
+                        if (cleanedBrand != null) {
+                            brandList.add(cleanedBrand);
                         }
-                        mProfileNumberOfDevices.setText(Long.toString(count));
                     }
-                });
-
-                currentUser = mAuth.getCurrentUser();
-
-                mProfileLogOutButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        mAuth.signOut();
-                        if (currentUser.isAnonymous()) {
-                            currentUser.delete();
-                        }
-                        startActivity(new Intent(Main.this, LogIn.class));
-                    }
-                });
-
-                mEditProfileButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        startActivity(new Intent(Main.this, EditProfile.class));
-                    }
-                });
-
-                ////////////////////////////////// Devices /////////////////////////////////////////
-                mAddDeviceButton = (FloatingActionButton) findViewById(R.id.addDeviceButton);
-
-                mAddDeviceButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        startActivity(new Intent(Main.this, AddDevice.class));
-                    }
-                });
-
-
-                mDeviceList = findViewById(R.id.deviceList);
-
-                devices = new ArrayList<>();
-
-                deviceListAdapter = new ArrayAdapter<String>(Main.this, android.R.layout.simple_list_item_1, devices);
-
-                mDeviceList.setAdapter(deviceListAdapter);
-
-                deviceIdMap = new HashMap<>();
-                mRootRef.child("User").child(mAuth.getCurrentUser().getUid()).child("Devices").addChildEventListener(new SimpleChildListener() {
-                    @Override
-                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                        final Firebase device = mRootRef.child("Device").child(dataSnapshot.getKey());
-                        String deviceId = dataSnapshot.getKey();
-                        //get model ID
-                        device.child("modelName").addListenerForSingleValueEvent(new CallableValueEventListener<String>(deviceId, new CallableForFirebase<String>() {
+                    brandModelMap = new HashMap<>();
+                    for (String brand : brandList) {
+                        mRootRef.child("Brand").child(brand).child("Model").addListenerForSingleValueEvent(new CallableValueEventListener<String>(brand, new CallableForFirebase<String>() {
                             @Override
                             public void call(String param, DataSnapshot data) {
+                                ArrayList<String> models = new ArrayList<>();
+                                for (DataSnapshot snapshot : data.getChildren()) {
+                                    String value = snapshot.getValue().toString();
+                                    modelOfBrand.add(value);
+                                    models.add(value);
+                                    modelAdapter.notifyDataSetChanged();
+                                    modelMap.put(value, snapshot.getKey());
+                                    Log.d("Model", "Load model: " + value);
+                                    FirebaseCrash.log("Load model: " + value);
+                                }
+                                brandChanged = false;
+                                brandModelMap.put(param, models);
+                                Log.d("Model", "Model updated");
+                                FirebaseCrash.log("Model updated");
+                            }
+                        }));
+                    }
+                }
+            }
+        });
+
+        mStatisticsSearchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //get models
+                Map<String, String> brandModelParamMap = new HashMap<>(); //model - brand
+                ArrayList<String> models = Utils.cleanFromTokenizer(mStatisticsModelsAutoComplete.getText().toString());
+                ArrayList<String> brands = Utils.cleanFromTokenizer(mStatisticsBrandsAutoComplete.getText().toString());
+                //check for statistics
+                ArrayList<Object> callableParam = new ArrayList<>();
+                callableParam.add(brands); //0
+                callableParam.add(models); //1
+                callableParam.add(brandModelParamMap); //2
+                Counter triggerObserver = new Counter(0);
+
+                Trigger<Counter> listTrigger = new Trigger<>(new Condition<Counter>(triggerObserver, models) {
+                    @Override
+                    public boolean isTrue() {
+                        return this.getObserver().get() == ((ArrayList<String>) getExtra()).size();
+                    }
+                }, new Callable<Counter>(callableParam) {
+                    @Override
+                    public void call(Counter data) {
+                        //find matches
+                        ArrayList<String> brands = ((ArrayList<String>)((ArrayList<Object>) getExtra()).get(0));
+                        ArrayList<String> models = ((ArrayList<String>)((ArrayList<Object>) getExtra()).get(1));
+                        Map<String, String> brandModelParamMap = ((Map<String, String>)((ArrayList<Object>)getExtra()).get(2));
+                        for (String brand : brands) {
+                            for (String model : models) {
+                                if (brandModelMap.get(brand).contains(model)) {
+                                    brandModelParamMap.put(model, brand);
+                                }
+                            }
+                        }
+                        //give parameters
+                        Intent statisticIntent = new Intent(Main.this, Statistics.class);
+                        String modelBase = "MODEL";
+                        String brandBase = "BRAND";
+                        int i = 1;
+                        for (Map.Entry<String, String> entry : brandModelParamMap.entrySet()) {
+                            statisticIntent.putExtra(modelBase + i, modelMap.get(entry.getKey()));
+                            statisticIntent.putExtra(brandBase + i, entry.getValue());
+                            i++;
+                        }
+                        Log.d("Search", "Start activity with map: " + brandModelParamMap.toString());
+                        FirebaseCrash.log("Start activity with map: " + brandModelParamMap.toString());
+                        startActivity(statisticIntent);
+                    }
+                });
+                //check for statistics
+                for (String model : models) {
+                    ArrayList<Object> param = new ArrayList<>();
+                    param.add(model); //0
+                    param.add(listTrigger); //1
+                    if (modelMap.get(model) == null){
+                        Toast.makeText(Main.this, "Cannot find model: " + model, Toast.LENGTH_SHORT).show();
+                        break;
+                    }else {
+                        mRootRef.child("Statistics").child("Models").child(modelMap.get(model)).addListenerForSingleValueEvent(new CallableValueEventListener<ArrayList<Object>>(param, new CallableForFirebase<ArrayList<Object>>() {
+                            @Override
+                            public void call(ArrayList<Object> param, DataSnapshot data) {
+                                Trigger<Counter> trigger = ((Trigger<Counter>) param.get(1));
                                 if (data.getValue() != null) {
-                                    ArrayList<String> paramPack = new ArrayList<>();
-                                    if (data.getValue() == null) {
-                                        FirebaseCrash.report(new Exception());
-                                    }
-                                    String modelId = data.getValue().toString();
-                                    //param = deviceId
-                                    paramPack.add(param); //0
-                                    paramPack.add(modelId); //1
-                                    //get Brand name
-                                    device.child("brandName").addListenerForSingleValueEvent(new CallableValueEventListener<ArrayList<String>>(paramPack, new CallableForFirebase<ArrayList<String>>() {
-                                        @Override
-                                        public void call(ArrayList<String> param, DataSnapshot data) {
-                                            if (data.getValue() != null) {
-                                                String brandName = data.getValue().toString();
-                                                param.add(brandName); //2
-                                                //get Model name with brand name and model ID
-                                                //check if unknown model
-                                                device.child("unknownModel").addListenerForSingleValueEvent(new CallableValueEventListener<ArrayList<String>>(param, new CallableForFirebase<ArrayList<String>>() {
-                                                    @Override
-                                                    public void call(ArrayList<String> param, DataSnapshot data) {
-                                                        if (data.getValue() != null) {
-                                                            //unknown model
-                                                            mRootRef.child("UnknownBrand_Model").child("Brand").child(param.get(2)).child("Model").child(param.get(1)).child("Name").addListenerForSingleValueEvent(new CallableValueEventListener<String>(param.get(0), new CallableForFirebase<String>() {
-                                                                @Override
-                                                                public void call(String param, DataSnapshot data) {
-                                                                    String modelName = data.getValue().toString();
-                                                                    //param = deviceId
-                                                                    deviceIdMap.put(modelName, param);
-                                                                    Log.d("DeviceList", "Load Device: " + modelName);
-                                                                    FirebaseCrash.log("Load Device: " + modelName);
-                                                                    devices.add(modelName);
-                                                                    deviceListAdapter.notifyDataSetChanged();
-                                                                }
-                                                            }));
-                                                        } else {
-                                                            //known brand and model
-                                                            mRootRef.child("Brand").child(param.get(2)).child("Model").child(param.get(1)).addListenerForSingleValueEvent(new CallableValueEventListener<String>(param.get(0), new CallableForFirebase<String>() {
-                                                                @Override
-                                                                public void call(String param, DataSnapshot data) {
-                                                                    String modelName = data.getValue().toString();
-                                                                    //param = deviceId
-                                                                    deviceIdMap.put(modelName, param);
-                                                                    Log.d("DeviceList", "Load Device: " + modelName);
-                                                                    FirebaseCrash.log("Load Device: " + modelName);
-                                                                    devices.add(modelName);
-                                                                    deviceListAdapter.notifyDataSetChanged();
-                                                                }
-                                                            }));
-                                                        }
-                                                    }
-                                                }));
-                                            }
-                                        }
-                                    }));
+                                    trigger.getCondition().getObserver().add(1);
+                                    trigger.onChange();
+                                } else {
+                                    Toast.makeText(Main.this, "There is no statistic for the model: " + ((String) param.get(0)), Toast.LENGTH_LONG).show();
                                 }
                             }
                         }));
                     }
-                });
+                }
+            }
+        });
+        ///////////////////////////////////// Profile //////////////////////////////////////
 
-                mDeviceList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mProfileEmailTextView = (TextView) findViewById(R.id.profileEmailTextView);
+        mProfileNumberOfDevices = (TextView) findViewById(R.id.profileNumberOfDevices);
+        mDevicesText = findViewById(R.id.DevicesTextView);
+        mProfileLogOutButton = (Button) findViewById(R.id.profileLougOutButton);
+        mEditProfileButton = (FloatingActionButton) findViewById(R.id.editProfileButton);
 
+        //set fields
+        mProfileEmailTextView.setText(mAuth.getCurrentUser().getEmail());
+        mRootRef.child("User").child(mAuth.getCurrentUser().getUid()).child("Devices").addListenerForSingleValueEvent(new SimpleValueListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                long count = dataSnapshot.getChildrenCount();
+                if (count == 1) {
+                    mDevicesText.setText("Device");
+                }
+                mProfileNumberOfDevices.setText(Long.toString(count));
+            }
+        });
+
+        currentUser = mAuth.getCurrentUser();
+
+        mProfileLogOutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mAuth.signOut();
+                if (currentUser.isAnonymous()) {
+                    currentUser.delete();
+                }
+                startActivity(new Intent(Main.this, LogIn.class));
+            }
+        });
+
+        mEditProfileButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(Main.this, EditProfile.class));
+            }
+        });
+
+        ////////////////////////////////// Devices /////////////////////////////////////////
+        mAddDeviceButton = (FloatingActionButton) findViewById(R.id.addDeviceButton);
+
+        mAddDeviceButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(Main.this, AddDevice.class));
+            }
+        });
+
+
+        mDeviceList = findViewById(R.id.deviceList);
+
+        devices = new ArrayList<>();
+
+        deviceListAdapter = new ArrayAdapter<String>(Main.this, android.R.layout.simple_list_item_1, devices);
+
+        mDeviceList.setAdapter(deviceListAdapter);
+
+        deviceIdMap = new HashMap<>();
+        mRootRef.child("User").child(mAuth.getCurrentUser().getUid()).child("Devices").addChildEventListener(new SimpleChildListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                final Firebase device = mRootRef.child("Device").child(dataSnapshot.getKey());
+                String deviceId = dataSnapshot.getKey();
+                //get model ID
+                device.child("modelName").addListenerForSingleValueEvent(new CallableValueEventListener<String>(deviceId, new CallableForFirebase<String>() {
                     @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        Intent intent = new Intent(Main.this, DeviceDetail.class);
-                        String deviceModel = mDeviceList.getItemAtPosition(position).toString();
-                        String deviceId = deviceIdMap.get(deviceModel);
-                        Log.d("ListElement", "Number: " + deviceId);
-                        intent.putExtra("DeviceId", deviceId);
-                        startActivity(intent);
+                    public void call(String param, DataSnapshot data) {
+                        if (data.getValue() != null) {
+                            ArrayList<String> paramPack = new ArrayList<>();
+                            if (data.getValue() == null) {
+                                FirebaseCrash.report(new Exception());
+                            }
+                            String modelId = data.getValue().toString();
+                            //param = deviceId
+                            paramPack.add(param); //0
+                            paramPack.add(modelId); //1
+                            //get Brand name
+                            device.child("brandName").addListenerForSingleValueEvent(new CallableValueEventListener<ArrayList<String>>(paramPack, new CallableForFirebase<ArrayList<String>>() {
+                                @Override
+                                public void call(ArrayList<String> param, DataSnapshot data) {
+                                    if (data.getValue() != null) {
+                                        String brandName = data.getValue().toString();
+                                        param.add(brandName); //2
+                                        //get Model name with brand name and model ID
+                                        //check if unknown model
+                                        device.child("unknownModel").addListenerForSingleValueEvent(new CallableValueEventListener<ArrayList<String>>(param, new CallableForFirebase<ArrayList<String>>() {
+                                            @Override
+                                            public void call(ArrayList<String> param, DataSnapshot data) {
+                                                if (data.getValue() != null) {
+                                                    //unknown model
+                                                    mRootRef.child("UnknownBrand_Model").child("Brand").child(param.get(2)).child("Model").child(param.get(1)).child("Name").addListenerForSingleValueEvent(new CallableValueEventListener<String>(param.get(0), new CallableForFirebase<String>() {
+                                                        @Override
+                                                        public void call(String param, DataSnapshot data) {
+                                                            String modelName = data.getValue().toString();
+                                                            //param = deviceId
+                                                            deviceIdMap.put(modelName, param);
+                                                            Log.d("DeviceList", "Load Device: " + modelName);
+                                                            FirebaseCrash.log("Load Device: " + modelName);
+                                                            devices.add(modelName);
+                                                            deviceListAdapter.notifyDataSetChanged();
+                                                        }
+                                                    }));
+                                                } else {
+                                                    //known brand and model
+                                                    mRootRef.child("Brand").child(param.get(2)).child("Model").child(param.get(1)).addListenerForSingleValueEvent(new CallableValueEventListener<String>(param.get(0), new CallableForFirebase<String>() {
+                                                        @Override
+                                                        public void call(String param, DataSnapshot data) {
+                                                            String modelName = data.getValue().toString();
+                                                            //param = deviceId
+                                                            deviceIdMap.put(modelName, param);
+                                                            Log.d("DeviceList", "Load Device: " + modelName);
+                                                            FirebaseCrash.log("Load Device: " + modelName);
+                                                            devices.add(modelName);
+                                                            deviceListAdapter.notifyDataSetChanged();
+                                                        }
+                                                    }));
+                                                }
+                                            }
+                                        }));
+                                    }
+                                }
+                            }));
+                        }
                     }
-                });
+                }));
+            }
+        });
 
+        mDeviceList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(Main.this, DeviceDetail.class);
+                String deviceModel = mDeviceList.getItemAtPosition(position).toString();
+                String deviceId = deviceIdMap.get(deviceModel);
+                Log.d("ListElement", "Number: " + deviceId);
+                intent.putExtra("DeviceId", deviceId);
+                startActivity(intent);
             }
         });
     }

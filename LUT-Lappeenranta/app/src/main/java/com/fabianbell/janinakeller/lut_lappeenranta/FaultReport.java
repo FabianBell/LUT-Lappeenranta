@@ -48,7 +48,7 @@ public class FaultReport extends AppCompatActivity {
     private ArrayList<String> conditions;
     private ArrayAdapter<String> conditionsAdapter;
 
-    //data
+    //lifetimeData
     private Map<String, String> deviceData;
     private String deviceId;
 
@@ -183,6 +183,7 @@ public class FaultReport extends AppCompatActivity {
             if (answer.equals("1")){
                 String faultId = saveFaultReport();
                 if (faultId != null) {
+                    changeCondition();
                     Intent deviceDetailIntent = new Intent(FaultReport.this, DeviceDetail.class);
                     deviceDetailIntent.putExtra("DeviceId", deviceId);
                     deviceDetailIntent.putExtra("DeviceModel", data.getStringExtra("EXTRA1"));

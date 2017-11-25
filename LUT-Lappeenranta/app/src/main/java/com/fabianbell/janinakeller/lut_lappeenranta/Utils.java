@@ -10,6 +10,7 @@ import android.util.Log;
 
 import com.fabianbell.janinakeller.lut_lappeenranta.listener.CallableForFirebase;
 import com.fabianbell.janinakeller.lut_lappeenranta.listener.CallableValueEventListener;
+import com.fabianbell.janinakeller.lut_lappeenranta.listener.Condition;
 import com.fabianbell.janinakeller.lut_lappeenranta.listener.DataAdapter;
 import com.fabianbell.janinakeller.lut_lappeenranta.listener.SimpleValueListener;
 import com.firebase.client.DataSnapshot;
@@ -259,6 +260,9 @@ public class Utils {
         while (data.endsWith(" ")){
             data.substring(data.length()-1);
         }
+        if (data.equals("")){
+            return null;
+        }
         return data;
     }
 
@@ -301,8 +305,8 @@ public class Utils {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 final Map<String, String> deviceData = dataSnapshot.getValue(Map.class);
                 if(deviceData.containsKey("unknownBrand") || deviceData.containsKey("unknownModel")){
-                    Log.d("data", "unknownModel or unknownBrand > serach for model name in unknown data");
-                    FirebaseCrash.log("unknownModel or unknownBrand > serach for model name in unknown data");
+                    Log.d("lifetimeData", "unknownModel or unknownBrand > serach for model name in unknown lifetimeData");
+                    FirebaseCrash.log("unknownModel or unknownBrand > serach for model name in unknown lifetimeData");
                     mRootRef.child("UnknownBrand_Model").child("Brand").child(deviceData.get("brandName")).child("Model").child(deviceData.get("modelName")).child("Name").addListenerForSingleValueEvent(new SimpleValueListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
@@ -313,7 +317,7 @@ public class Utils {
                         }
                     });
                 }else{
-                    Log.d("data", "model known > search model name");
+                    Log.d("lifetimeData", "model known > search model name");
                     FirebaseCrash.log("model known > search model name");
                     mRootRef.child("Brand").child(deviceData.get("brandName")).child("Model").child(deviceData.get("modelName")).addListenerForSingleValueEvent(new SimpleValueListener() {
                         @Override
@@ -327,5 +331,18 @@ public class Utils {
                 }
             }
         });
+    }
+
+    public static ArrayList<String> cleanFromTokenizer(String data){
+        String[] dataSplit = data.split(",");
+        ArrayList<String> cleanedData = new ArrayList<>();
+        String cleanedEntry;
+        for (String entry : dataSplit){
+            cleanedEntry = removeSpace(entry);
+            if (cleanedEntry != null){
+                cleanedData.add(cleanedEntry);
+            }
+        }
+        return cleanedData;
     }
 }

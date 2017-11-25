@@ -671,7 +671,7 @@ public class AddDevice extends AppCompatActivity {
                     FirebaseCrash.log("Deleted receipt from external storage");
                 }
             } else {
-                Log.d("data", "ImagePath is null but saveImage is not null");
+                Log.d("lifetimeData", "ImagePath is null but saveImage is not null");
                 FirebaseCrash.report(new Exception("ImagePath is null but saveImage is not null"));
             }
         }

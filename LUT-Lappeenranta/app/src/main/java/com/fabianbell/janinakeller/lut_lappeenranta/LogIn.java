@@ -212,7 +212,7 @@ public class LogIn extends AppCompatActivity implements GoogleApiClient.OnConnec
         }
     }
 
-    //gives the user data to the normal authantification system
+    //gives the user lifetimeData to the normal authantification system
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
         Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
 

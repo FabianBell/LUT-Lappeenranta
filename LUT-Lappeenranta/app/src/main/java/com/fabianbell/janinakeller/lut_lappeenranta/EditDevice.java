@@ -104,7 +104,7 @@ public class EditDevice extends AppCompatActivity {
     //ID
     private String deviceId;
 
-    //data
+    //lifetimeData
     private Map<String, String> data;
     private String thumbnailPath;
     private String imagePath;
@@ -242,7 +242,7 @@ public class EditDevice extends AppCompatActivity {
         mSaveDeviceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //get data
+                //get lifetimeData
                 String brandName = Utils.removeSpace(mDeviceBrand.getText().toString());
                 String condition = mDeviceCondition.getSelectedItem().toString();
                 String date = mDeviceDateOfPurchase.getDayOfMonth() + "." + (mDeviceDateOfPurchase.getMonth() + 1)  + "." + mDeviceDateOfPurchase.getYear();
@@ -492,7 +492,7 @@ public class EditDevice extends AppCompatActivity {
                                     String modelName = snapshot.getValue().toString();
                                     data.put("modelName", modelName);
 
-                                    //data set complete
+                                    //lifetimeData set complete
                                     Log.d("Data", "Data loaded successfully");
                                     FirebaseCrash.log("Data loaded successfully");
 
@@ -531,7 +531,7 @@ public class EditDevice extends AppCompatActivity {
                             String modelName = dataSnapshot.getValue().toString();
                             data.put("modelName", modelName);
 
-                            //data set complete
+                            //lifetimeData set complete
                             Log.d("Data", "Data loaded successfully");
                             FirebaseCrash.log("Data loaded successfully");
 
@@ -762,7 +762,7 @@ public class EditDevice extends AppCompatActivity {
                     FirebaseCrash.log("Deleted receipt from external storage");
                 }
             } else {
-                Log.d("data", "ImagePath is null but saveImage is not null");
+                Log.d("lifetimeData", "ImagePath is null but saveImage is not null");
                 FirebaseCrash.report(new Exception("ImagePath is null but saveImage is not null"));
             }
         }
@@ -778,7 +778,7 @@ public class EditDevice extends AppCompatActivity {
                     FirebaseCrash.log("Deleted receipt from external storage");
                 }
             } else {
-                Log.d("data", "ImagePath is null but saveImage is not null");
+                Log.d("lifetimeData", "ImagePath is null but saveImage is not null");
                 FirebaseCrash.report(new Exception("ImagePath is null but saveImage is not null"));
             }
         }
