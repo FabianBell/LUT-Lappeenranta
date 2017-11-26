@@ -3,12 +3,14 @@ package com.fabianbell.janinakeller.lut_lappeenranta;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -18,6 +20,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -77,6 +80,7 @@ public class AddDevice extends AppCompatActivity {
 
     //Permission
     static final int PERMISSION_REQUEST_CODE_CAMERA = 2;
+    static final int READ_EXTERNAL_STORAGE = 3;
 
     //image
     private String imagePath;
@@ -90,15 +94,18 @@ public class AddDevice extends AppCompatActivity {
     private boolean brandChanged;
 
     //Request Code
-    static final int REQUEST_IMAGE_CAPTURE = 1;
-    private final int ADD_UNKNOWN_MODEL_QUESTION = 2;
-    private final int ADD_UNKNOWN_BRAND_QUESTION = 3;
+    private static final int REQUEST_IMAGE_CAPTURE = 1;
+    private static final int ADD_UNKNOWN_MODEL_QUESTION = 2;
+    private static final int ADD_UNKNOWN_BRAND_QUESTION = 3;
     private static final int QUESTION_SAVE_PICTURE = 6;
+    private static final int PICK_IMAGE = 8;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_device);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         //get Elements
         //mDeviceCategory = findViewById(R.id.deviceCategory);
@@ -114,6 +121,7 @@ public class AddDevice extends AppCompatActivity {
 
         Button mAddReceipt = findViewById(R.id.addReceipt);
         Button mAddDeviceButton = findViewById(R.id.addDeviceButton);
+        Button mPickFromGalaryButton = findViewById(R.id.pickFromGalaryButton);
 
         mRootRef = new Firebase("https://lut-lappeenranta.firebaseio.com/");
         mAuth = FirebaseAuth.getInstance();
@@ -165,6 +173,11 @@ public class AddDevice extends AppCompatActivity {
             public void onClick(View v) {
                 String brandName = Utils.removeSpace(mDeviceBrand.getText().toString());
                 String modelName = Utils.removeSpace(mDeviceModel.getText().toString());
+
+                if(brandName == null || modelName == null){
+                    Toast.makeText(AddDevice.this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
                 //Brand and model upload
                 ArrayList<Object> param = new ArrayList<>();
@@ -313,6 +326,18 @@ public class AddDevice extends AppCompatActivity {
                 }
             }
         });
+
+        mPickFromGalaryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //check for permission
+                if(PermissionChecker.checkSelfPermission(AddDevice.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
+                    ActivityCompat.requestPermissions(AddDevice.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, READ_EXTERNAL_STORAGE);
+                }else{
+                    AddDevice.this.loadImageFromGallery();
+                }
+            }
+        });
     }
 
     private void addNormalDeviceData(String deviceId){
@@ -415,6 +440,13 @@ public class AddDevice extends AppCompatActivity {
                 Toast.makeText(AddDevice.this, "Without the permission you can not upload a picture", Toast.LENGTH_LONG).show();
             }
         }
+        if (requestCode == READ_EXTERNAL_STORAGE){
+            if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                loadImageFromGallery();
+            }else{
+                Toast.makeText(AddDevice.this, "Without the permission you can not upload a picture", Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     @Override
@@ -478,6 +510,29 @@ public class AddDevice extends AppCompatActivity {
                 saveImage = false;
             }
         }
+        if (requestCode == PICK_IMAGE && resultCode == RESULT_OK){
+            Uri uri = data.getData();
+            String wholeID = DocumentsContract.getDocumentId(uri);
+
+            // Split at colon, use second item in the array
+            String id = wholeID.split(":")[1];
+
+            String[] column = { MediaStore.Images.Media.DATA };
+
+            // where id is equal to
+            String sel = MediaStore.Images.Media._ID + "=?";
+
+            Cursor cursor = getContentResolver().
+                    query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                            column, sel, new String[]{ id }, null);
+
+            int columnIndex = cursor.getColumnIndex(column[0]);
+            if (cursor.moveToFirst()) {
+                imagePath = cursor.getString(columnIndex);
+            }
+            cursor.close();
+            displayImage();
+        }
     }
 
     private void displayImage(){
@@ -512,5 +567,33 @@ public class AddDevice extends AppCompatActivity {
                 FirebaseCrash.report(new Exception("ImagePath is null but saveImage is not null"));
             }
         }
+    }
+
+    private void loadImageFromGallery(){
+        Intent getIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        getIntent.setType("image/*");
+
+        //Intent pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        //pickIntent.setType("image/*");
+
+        Intent chooserIntent = Intent.createChooser(getIntent, "Select Image");
+        //chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] {pickIntent});
+
+        startActivityForResult(chooserIntent, PICK_IMAGE);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Intent mainIntent = new Intent(AddDevice.this, Main.class);
+        mainIntent.putExtra("TAG", "Devices");
+        startActivity(mainIntent);
+        return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent mainIntent = new Intent(AddDevice.this, Main.class);
+        mainIntent.putExtra("TAG", "Devices");
+        startActivity(mainIntent);
     }
 }

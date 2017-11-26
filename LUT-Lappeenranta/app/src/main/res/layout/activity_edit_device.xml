@@ -112,6 +112,13 @@
                     android:layout_weight="1"
                     android:text="Add Receipt/ Change Reciept" />
 
+                <Button
+                    android:id="@+id/pickFromGalaryButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="ADD/Change FROM GALLERY" />
+
             </LinearLayout>
 
             <LinearLayout

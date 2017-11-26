@@ -1,13 +1,16 @@
 package com.fabianbell.janinakeller.lut_lappeenranta;
 
+import android.*;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -84,6 +87,7 @@ public class EditDevice extends AppCompatActivity {
     private Button mAddReceipt;
     private Button mSaveDeviceButton;
     private Button mDeleteDeviceButton;
+    Button mPickFromGalleryButton;
 
     //private ProgressBar mUploadReceiptProgressBar;
 
@@ -95,12 +99,14 @@ public class EditDevice extends AppCompatActivity {
 
     //Permission
     private static final int PERMISSION_REQUEST_CODE_CAMERA = 2;
+    static final int READ_EXTERNAL_STORAGE = 3;
 
     //request code
     private static final int QUESTION_DELETE = 4;
     private static final int QUESTION_FAULTREPORT = 5;
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int QUESTION_SAVE_PICTURE = 6;
+    private static final int PICK_IMAGE = 8;
 
     //ID
     private String deviceId;
@@ -146,6 +152,7 @@ public class EditDevice extends AppCompatActivity {
         mDeviceShop = findViewById(R.id.deviceShop);
         mDeviceDateOfPurchase = findViewById(R.id.deviceDateOfPurchase);
         mDeviceCondition = findViewById(R.id.deviceCondition);
+        mPickFromGalleryButton = findViewById(R.id.pickFromGalaryButton);
 
         brands = new ArrayList<>();
         brandAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, brands);
@@ -336,6 +343,18 @@ public class EditDevice extends AppCompatActivity {
                     Log.d("Receipt", "Add Reciept");
                     FirebaseCrash.log("Add Reciept");
                     takePicture();
+                }
+            }
+        });
+
+        mPickFromGalleryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //check for permission
+                if(PermissionChecker.checkSelfPermission(EditDevice.this, android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
+                    ActivityCompat.requestPermissions(EditDevice.this, new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, READ_EXTERNAL_STORAGE);
+                }else{
+                    EditDevice.this.loadImageFromGallery();
                 }
             }
         });
@@ -588,13 +607,15 @@ public class EditDevice extends AppCompatActivity {
                     public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
                         Log.d("thumbnail", "thumbnail downloaded successfully");
                         FirebaseCrash.log("thumbnail downloaded successfully");
-                        mAddReceipt.setText("CHANGE RECIEPT");
+                        mAddReceipt.setText("CHANGE RECEIPT");
+                        mPickFromGalleryButton.setText("CHANGE RECEIPT FROM GALLERY");
                         displayImage();
                     }
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        mAddReceipt.setText("ADD RECIEPT");
+                        mAddReceipt.setText("ADD RECEIPT");
+                        mPickFromGalleryButton.setText("ADD RECEIPT FROM GALLERY");
                     }
                 });
             } catch (IOException e) {
@@ -697,6 +718,29 @@ public class EditDevice extends AppCompatActivity {
                 saveImage = false;
             }
         }
+        if (requestCode == PICK_IMAGE && resultCode == RESULT_OK){
+            Uri uri = data.getData();
+            String wholeID = DocumentsContract.getDocumentId(uri);
+
+            // Split at colon, use second item in the array
+            String id = wholeID.split(":")[1];
+
+            String[] column = { MediaStore.Images.Media.DATA };
+
+            // where id is equal to
+            String sel = MediaStore.Images.Media._ID + "=?";
+
+            Cursor cursor = getContentResolver().
+                    query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                            column, sel, new String[]{ id }, null);
+
+            int columnIndex = cursor.getColumnIndex(column[0]);
+            if (cursor.moveToFirst()) {
+                imagePath = cursor.getString(columnIndex);
+            }
+            cursor.close();
+            displayImage();
+        }
     }
 
     private void takePicture() {
@@ -738,6 +782,13 @@ public class EditDevice extends AppCompatActivity {
             }
             else {
                 Toast.makeText(EditDevice.this, "Without the permission you can not upload a picture", Toast.LENGTH_LONG);
+            }
+        }
+        if (requestCode == READ_EXTERNAL_STORAGE){
+            if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                loadImageFromGallery();
+            }else{
+                Toast.makeText(EditDevice.this, "Without the permission you can not upload a picture", Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -800,5 +851,18 @@ public class EditDevice extends AppCompatActivity {
         Intent deviceDetailIntent = new Intent(EditDevice.this, DeviceDetail.class);
         deviceDetailIntent.putExtra("DeviceId", deviceId);
         startActivity(deviceDetailIntent);
+    }
+
+    private void loadImageFromGallery(){
+        Intent getIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        getIntent.setType("image/*");
+
+        //Intent pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        //pickIntent.setType("image/*");
+
+        Intent chooserIntent = Intent.createChooser(getIntent, "Select Image");
+        //chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] {pickIntent});
+
+        startActivityForResult(chooserIntent, PICK_IMAGE);
     }
 }
