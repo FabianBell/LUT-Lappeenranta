@@ -4,13 +4,13 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.PermissionChecker;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,8 +20,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fabianbell.janinakeller.lut_lappeenranta.listener.DataAdapter;
-import com.fabianbell.janinakeller.lut_lappeenranta.listener.SimpleChildListener;
-import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -36,6 +34,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Map;
 
 public class DeviceDetail extends AppCompatActivity {
@@ -43,7 +42,6 @@ public class DeviceDetail extends AppCompatActivity {
     //Firebase
     Firebase mRefRoot;
     private StorageReference storageReference;
-    private FirebaseAuth mAuth;
 
     //Permision
     private final int PERMISSION_REQUEST_CODE_WRITE_EXTERNAL_STORAGE = 3;
@@ -52,8 +50,6 @@ public class DeviceDetail extends AppCompatActivity {
     private String imagePath;
 
     //Button
-    private FloatingActionButton mEditDeviceButton;
-    private Button mRecieptButton;
     private Button mDeviceFaultReportButton;
 
     //special
@@ -64,7 +60,7 @@ public class DeviceDetail extends AppCompatActivity {
     private Map<String, String> deviceData;
 
     private TextView mDeviceModel;
-    private TextView mDeviceCategory;
+    //private TextView mDeviceCategory;
     private TextView mDeviceBrand;
     private TextView mDeviceNumber;
     private TextView mDevicePrice;
@@ -78,23 +74,24 @@ public class DeviceDetail extends AppCompatActivity {
         setContentView(R.layout.activity_device_detail);
 
         mRefRoot = new Firebase("https://lut-lappeenranta.firebaseio.com/");
-        mAuth = FirebaseAuth.getInstance();
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
         deviceId = getIntent().getStringExtra("DeviceId");
+        //noinspection ConstantConditions
         storageReference = FirebaseStorage.getInstance().getReference().child("User_receipt").child(mAuth.getCurrentUser().getUid() + "_" + deviceId + ".jpg" );
 
         //get Elements
-        mEditDeviceButton = (FloatingActionButton) findViewById(R.id.editDeviceButton);
-        mRecieptButton = (Button) findViewById(R.id.recieptButton);
-        mDeviceFaultReportButton = (Button) findViewById(R.id.deviceFaultReportButton);
+        FloatingActionButton mEditDeviceButton = findViewById(R.id.editDeviceButton);
+        Button mReceiptButton = findViewById(R.id.recieptButton);
+        mDeviceFaultReportButton = findViewById(R.id.deviceFaultReportButton);
 
-        mDownloadBar = (ProgressBar) findViewById(R.id.downloadProgress);
+        mDownloadBar = findViewById(R.id.downloadProgress);
 
-        mDeviceModel = (TextView) findViewById(R.id.DeviceDetailModel);
-        mDeviceCategory = (TextView) findViewById(R.id.DeviceDetailCategory);
-        mDeviceBrand = (TextView) findViewById(R.id.DeviceDetailBrand);
-        mDeviceNumber = (TextView) findViewById(R.id.DeviceDetailNumber);
-        mDevicePrice = (TextView) findViewById(R.id.DeviceDetailPrice);
+        mDeviceModel = findViewById(R.id.DeviceDetailModel);
+        //mDeviceCategory = findViewById(R.id.DeviceDetailCategory);
+        mDeviceBrand = findViewById(R.id.DeviceDetailBrand);
+        mDeviceNumber = findViewById(R.id.DeviceDetailNumber);
+        mDevicePrice = findViewById(R.id.DeviceDetailPrice);
         mDeviceShop = findViewById(R.id.DeviceDetailShop);
         mDeviceDate = findViewById(R.id.DeviceDetailDate);
         mDeviceCondition = findViewById(R.id.DeviceDetailCondition);
@@ -119,7 +116,7 @@ public class DeviceDetail extends AppCompatActivity {
             }
         });
 
-        mRecieptButton.setOnClickListener(new View.OnClickListener() {
+        mReceiptButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(PermissionChecker.checkSelfPermission(DeviceDetail.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
@@ -146,37 +143,38 @@ public class DeviceDetail extends AppCompatActivity {
                     if (key.equals("brandName")){
                         mDeviceBrand.setText(value);
                     }else{
-                        if(key.equals("category")){
-                            mDeviceCategory.setText(value);
-                        }else{
-                            if(key.equals("condition")){
-                                mDeviceCondition.setText(value);
-                            }else{
-                                if(key.equals("date")){
-                                    mDeviceDate.setText(value);
-                                }else{
-                                    if(key.equals("modelName")){
-                                        mDeviceModel.setText(value);
-                                    }else{
-                                        if(key.equals("price")){
-                                            mDevicePrice.setText(value);
-                                        }else{
-                                            if(key.equals("shop")){
-                                                mDeviceShop.setText(value);
-                                            }else{
-                                                if(key.equals("deviceNumber")){
-                                                    mDeviceNumber.setText(value);
-                                                }else {
-                                                    if(key.equals("unknownModel")){
-                                                        mDeviceModel.setText(mDeviceModel.getText().toString() + " (unknown)");
-                                                        ((ViewGroup) mDeviceFaultReportButton.getParent()).removeView(mDeviceFaultReportButton);
-                                                    }else {
-                                                        if (key.equals("unknownBrand")){
-                                                            mDeviceBrand.setText(mDeviceBrand.getText().toString() + " (unknown)");
-                                                        }else {
-                                                            Log.e("deviceData", "Cannot categorize Data with key: " + key);
-                                                            FirebaseCrash.log("Cannot categorize Data with key: " + key);
-                                                        }
+                        //if(key.equals("category")){
+                        //    mDeviceCategory.setText(value);
+                        //}else{
+                        if(key.equals("condition")) {
+                            mDeviceCondition.setText(value);
+                        }else {
+                            if (key.equals("date")) {
+                                mDeviceDate.setText(value);
+                            } else {
+                                if (key.equals("modelName")) {
+                                    mDeviceModel.setText(value);
+                                } else {
+                                    if (key.equals("price")) {
+                                        mDevicePrice.setText(value);
+                                    } else {
+                                        if (key.equals("shop")) {
+                                            mDeviceShop.setText(value);
+                                        } else {
+                                            if (key.equals("deviceNumber")) {
+                                                mDeviceNumber.setText(value);
+                                            } else {
+                                                if (key.equals("unknownModel")) {
+                                                    String modelText = mDeviceModel.getText().toString() + " (unknown)";
+                                                    mDeviceModel.setText(modelText);
+                                                    ((ViewGroup) mDeviceFaultReportButton.getParent()).removeView(mDeviceFaultReportButton);
+                                                } else {
+                                                    if (key.equals("unknownBrand")) {
+                                                        String brandText = mDeviceBrand.getText().toString() + " (unknown)";
+                                                        mDeviceBrand.setText(brandText);
+                                                    } else {
+                                                        Log.e("deviceData", "Cannot categorize Data with key: " + key);
+                                                        FirebaseCrash.log("Cannot categorize Data with key: " + key);
                                                     }
                                                 }
                                             }
@@ -192,7 +190,7 @@ public class DeviceDetail extends AppCompatActivity {
     }
 
     private File createImageFile() throws IOException {
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
         File dcim = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath());
         File saveDir = new File(dcim,"XBrandtation");
@@ -275,11 +273,5 @@ public class DeviceDetail extends AppCompatActivity {
         savedInstanceState.putString("IMAGE_PATH", imagePath);
     }
 
-    private void galleryAddpic() {
-        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        File f = new File(imagePath);
-        Uri contentUri = Uri.fromFile(f);
-        mediaScanIntent.setData(contentUri);
-        this.sendBroadcast(mediaScanIntent);
-    }
+    //todo add pic from libary
 }

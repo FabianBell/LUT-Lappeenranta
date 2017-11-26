@@ -84,7 +84,7 @@ public class EditDevice extends AppCompatActivity {
     private Button mSaveDeviceButton;
     private Button mDeleteDeviceButton;
 
-    private ProgressBar mUploadReceiptProgressBar;
+    //private ProgressBar mUploadReceiptProgressBar;
 
     //autocomplete
     private ArrayList<String> brands;

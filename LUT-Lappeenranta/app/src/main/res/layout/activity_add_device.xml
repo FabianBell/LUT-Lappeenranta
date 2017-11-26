@@ -27,12 +27,12 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent">
 
-                <Spinner
+                <!--<Spinner
                     android:id="@+id/deviceCategory"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
                     android:layout_weight="1"
-                    android:tooltipText="Condition" />
+                    android:tooltipText="Condition" />-->
 
                 <AutoCompleteTextView
                     android:id="@+id/deviceBrand"
