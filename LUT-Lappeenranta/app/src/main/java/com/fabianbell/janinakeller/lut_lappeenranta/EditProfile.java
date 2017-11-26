@@ -1,10 +1,13 @@
 package com.fabianbell.janinakeller.lut_lappeenranta;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -52,6 +55,9 @@ public class EditProfile extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_profile);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
 
         mRootRef = new Firebase("https://lut-lappeenranta.firebaseio.com/");
         mAuth = FirebaseAuth.getInstance();
@@ -191,5 +197,19 @@ public class EditProfile extends AppCompatActivity {
             //return to login
             startActivity(new Intent(EditProfile.this, LogIn.class));
         }
+    }
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent (EditProfile.this, Main.class);
+        intent.putExtra("TAG","Profile");
+        startActivity(intent);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Intent mainIntent = new Intent(EditProfile.this, Main.class);
+        mainIntent.putExtra("TAG", "Profile");
+        startActivity(mainIntent);
+        return true;
     }
 }

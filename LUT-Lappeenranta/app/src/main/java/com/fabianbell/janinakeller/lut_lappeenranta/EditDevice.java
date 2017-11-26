@@ -17,6 +17,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -115,6 +116,8 @@ public class EditDevice extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_device);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         if (savedInstanceState != null){
             thumbnailPath = savedInstanceState.getString("THUMBNAIL_PATH");
@@ -782,5 +785,20 @@ public class EditDevice extends AppCompatActivity {
                 FirebaseCrash.report(new Exception("ImagePath is null but saveImage is not null"));
             }
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Intent deviceDetailIntent = new Intent(EditDevice.this, DeviceDetail.class);
+        deviceDetailIntent.putExtra("DeviceId", deviceId);
+        startActivity(deviceDetailIntent);
+        return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent deviceDetailIntent = new Intent(EditDevice.this, DeviceDetail.class);
+        deviceDetailIntent.putExtra("DeviceId", deviceId);
+        startActivity(deviceDetailIntent);
     }
 }

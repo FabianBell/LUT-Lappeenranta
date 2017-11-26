@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -38,6 +39,7 @@ public class ChangePassword extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_change_password);
 
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
@@ -110,5 +112,18 @@ public class ChangePassword extends AppCompatActivity {
             });
 
         }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Intent editProfile = new Intent(ChangePassword.this, EditProfile.class);
+        startActivity(editProfile);
+        return true;
     }
+
+    @Override
+    public void onBackPressed() {
+        Intent editProfile = new Intent(ChangePassword.this, EditProfile.class);
+        startActivity(editProfile);
+    }
+}
 

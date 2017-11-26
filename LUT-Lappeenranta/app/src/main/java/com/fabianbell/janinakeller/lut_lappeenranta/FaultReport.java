@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -61,6 +62,8 @@ public class FaultReport extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fault_report);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         if (savedInstanceState != null){
             deviceId = savedInstanceState.getString("deviceId");
@@ -202,8 +205,22 @@ public class FaultReport extends AppCompatActivity {
                     startActivity(mainIntent);
                     Utils.deleteDevice(deviceId, mAuth.getCurrentUser().getUid());
                 }
-
             }
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Intent deviceDetailIntent = new Intent(FaultReport.this, DeviceDetail.class);
+        deviceDetailIntent.putExtra("DeviceId", deviceId);
+        startActivity(deviceDetailIntent);
+        return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent deviceDetailIntent = new Intent(FaultReport.this, DeviceDetail.class);
+        deviceDetailIntent.putExtra("DeviceId", deviceId);
+        startActivity(deviceDetailIntent);
     }
 }

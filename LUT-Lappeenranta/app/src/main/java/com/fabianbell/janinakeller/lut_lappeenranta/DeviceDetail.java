@@ -12,6 +12,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.PermissionChecker;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -72,6 +73,8 @@ public class DeviceDetail extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_detail);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mRefRoot = new Firebase("https://lut-lappeenranta.firebaseio.com/");
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
@@ -274,4 +277,20 @@ public class DeviceDetail extends AppCompatActivity {
     }
 
     //todo add pic from libary
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Intent mainInent = new Intent(DeviceDetail.this, Main.class);
+        mainInent.putExtra("TAG", "Devices");
+        startActivity(mainInent);
+        return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent mainInent = new Intent(DeviceDetail.this, Main.class);
+        mainInent.putExtra("TAG", "Devices");
+        startActivity(mainInent);
+    }
 }

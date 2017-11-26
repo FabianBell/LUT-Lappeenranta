@@ -255,4 +255,9 @@ public class LogIn extends AppCompatActivity implements GoogleApiClient.OnConnec
             }
         });
     }
+
+    @Override
+    public void onBackPressed() {
+        return;
+    }
 }

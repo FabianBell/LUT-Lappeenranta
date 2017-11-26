@@ -5,9 +5,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="center_vertical|center_horizontal|center"
+    android:background="@color/colorPrimary"
     android:foregroundGravity="center_vertical|center_horizontal|center"
     app:layout_anchorGravity="center_vertical|center_horizontal|center"
     tools:context="com.fabianbell.janinakeller.lut_lappeenranta.LoadingScreen">
+
 
     <LinearLayout
         android:layout_width="383dp"
@@ -21,13 +23,19 @@
             style="?android:attr/progressBarStyle"
             android:layout_width="match_parent"
             android:layout_height="100dp"
-            android:layout_gravity="center_vertical|center_horizontal|center" />
+            android:layout_gravity="center_vertical|center_horizontal|center"
+            android:backgroundTint="@android:color/white"
+            android:progressTint="@color/colorAccent"
+            android:indeterminateTint="@android:color/white"
+            android:progressBackgroundTint="@android:color/white"
+            android:foregroundTint="@android:color/white" />
 
         <TextView
             android:id="@+id/loadingTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical|center_horizontal|center"
+            android:textColor="@android:color/white"
             android:text="@string/loading" />
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>
