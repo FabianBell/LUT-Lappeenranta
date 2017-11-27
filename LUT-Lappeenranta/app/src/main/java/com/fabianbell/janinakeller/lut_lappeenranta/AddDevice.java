@@ -69,6 +69,7 @@ public class AddDevice extends AppCompatActivity {
     private EditText mDeviceShop;
     private DatePicker mDeviceDateOfPurchase;
     private Spinner mDeviceCondition;
+    private DatePicker mDeviceGuarantee;
 
     private ImageView mReceipt;
 
@@ -116,6 +117,7 @@ public class AddDevice extends AppCompatActivity {
         mDeviceShop = findViewById(R.id.deviceShop);
         mDeviceDateOfPurchase = findViewById(R.id.deviceDateOfPurchase);
         mDeviceCondition = findViewById(R.id.deviceCondition);
+        mDeviceGuarantee = findViewById(R.id.deviceGuarantee);
 
         mReceipt = findViewById(R.id.receipt);
 
@@ -140,7 +142,7 @@ public class AddDevice extends AppCompatActivity {
         //set Date
         Calendar currentDate = Calendar.getInstance();
         mDeviceDateOfPurchase.updateDate(currentDate.get(Calendar.YEAR), currentDate.get(Calendar.MONTH), currentDate.get(Calendar.DAY_OF_MONTH));
-
+        mDeviceGuarantee.updateDate(currentDate.get(Calendar.YEAR), currentDate.get(Calendar.MONTH), currentDate.get(Calendar.DAY_OF_MONTH));
 
         brands = new ArrayList<>();
 
@@ -342,11 +344,12 @@ public class AddDevice extends AppCompatActivity {
 
     private void addNormalDeviceData(String deviceId){
         //String category = mDeviceCategory.getSelectedItem().toString();
-        String deviceNumber = mDeviceIdNumber.getText().toString();
-        String price = mDevicePrice.getText().toString();
-        String shop = mDeviceShop.getText().toString();
-        String date = mDeviceDateOfPurchase.getDayOfMonth() + "." + (mDeviceDateOfPurchase.getMonth() + 1) + "." + mDeviceDateOfPurchase.getYear();
-        String condition = mDeviceCondition.getSelectedItem().toString();
+        String deviceNumber = Utils.inputDefault(mDeviceIdNumber.getText().toString());
+        String price = Utils.inputDefault(mDevicePrice.getText().toString());
+        String shop = Utils.inputDefault(mDeviceShop.getText().toString());
+        String date = Utils.inputDefault((mDeviceDateOfPurchase.getDayOfMonth() + "." + (mDeviceDateOfPurchase.getMonth() + 1) + "." + mDeviceDateOfPurchase.getYear()));
+        String dateOfGuaranty = Utils.inputDefault(mDeviceGuarantee.getDayOfMonth() + "." + (mDeviceGuarantee.getMonth() + 1) + "." + mDeviceGuarantee.getYear());
+        String condition = Utils.inputDefault(mDeviceCondition.getSelectedItem().toString());
 
         Firebase deviceById = mRootRef.child("Device").child(deviceId);
         if (mAuth.getCurrentUser() != null) {
@@ -357,6 +360,7 @@ public class AddDevice extends AppCompatActivity {
             deviceById.child("price").setValue(price);
             deviceById.child("shop").setValue(shop);
             deviceById.child("date").setValue(date);
+            deviceById.child("guarantee").setValue(dateOfGuaranty);
             deviceById.child("condition").setValue(condition);
             deviceById.child("deviceNumber").setValue(deviceNumber);
         }

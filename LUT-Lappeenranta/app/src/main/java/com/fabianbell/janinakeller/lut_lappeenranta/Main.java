@@ -99,6 +99,8 @@ public class Main extends AppCompatActivity {
         mRootRef = new Firebase("https://lut-lappeenranta.firebaseio.com/");
         mAuth = FirebaseAuth.getInstance();
 
+        Utils.data();
+
         host = (TabHost) findViewById(R.id.tabhost);
         host.setup();
 
@@ -298,6 +300,8 @@ public class Main extends AppCompatActivity {
             }
         });
 
+        Button mStatisticsLogOutButton = findViewById(R.id.statisticsLogOutButton);
+
         ////////////////////////////////// Devices /////////////////////////////////////////
         if(!mAuth.getCurrentUser().isAnonymous()) {
             mAddDeviceButton = (FloatingActionButton) findViewById(R.id.addDeviceButton);
@@ -436,6 +440,8 @@ public class Main extends AppCompatActivity {
                 }
             });
 
+            ((ViewGroup) mStatisticsLogOutButton.getParent()).removeView(mStatisticsLogOutButton);
+
             mEditProfileButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -447,6 +453,15 @@ public class Main extends AppCompatActivity {
             LinearLayout mProfile = findViewById(R.id.profile);
             ((ViewGroup) mDevices.getParent()).removeView(mDevices);
             ((ViewGroup) mProfile.getParent()).removeView(mProfile);
+
+            mStatisticsLogOutButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    FirebaseUser user = mAuth.getCurrentUser();
+                    user.delete();
+                    startActivity(new Intent(Main.this, LogIn.class));
+                }
+            });
         }
 
     }

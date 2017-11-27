@@ -68,6 +68,7 @@ public class DeviceDetail extends AppCompatActivity {
     private TextView mDeviceShop;
     private TextView mDeviceDate;
     private TextView mDeviceCondition;
+    private TextView mDeviceDetailGuarantee;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,6 +99,7 @@ public class DeviceDetail extends AppCompatActivity {
         mDeviceShop = findViewById(R.id.DeviceDetailShop);
         mDeviceDate = findViewById(R.id.DeviceDetailDate);
         mDeviceCondition = findViewById(R.id.DeviceDetailCondition);
+        mDeviceDetailGuarantee = findViewById(R.id.DeviceDetailGuarantee);
 
 
         mDeviceFaultReportButton.setOnClickListener(new View.OnClickListener() {
@@ -176,8 +178,12 @@ public class DeviceDetail extends AppCompatActivity {
                                                         String brandText = mDeviceBrand.getText().toString() + " (unknown)";
                                                         mDeviceBrand.setText(brandText);
                                                     } else {
-                                                        Log.e("deviceData", "Cannot categorize Data with key: " + key);
-                                                        FirebaseCrash.log("Cannot categorize Data with key: " + key);
+                                                        if (key.equals("guarantee")){
+                                                            mDeviceDetailGuarantee.setText(value);
+                                                        }else {
+                                                            Log.e("deviceData", "Cannot categorize Data with key: " + key);
+                                                            FirebaseCrash.log("Cannot categorize Data with key: " + key);
+                                                        }
                                                     }
                                                 }
                                             }

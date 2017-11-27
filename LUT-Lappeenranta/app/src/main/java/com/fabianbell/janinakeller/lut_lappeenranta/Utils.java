@@ -79,7 +79,7 @@ public class Utils {
         setBrandAndModel(modelName, brandName, deviceId, null, null);
     }
 
-    public static void setBrandAndModel(String modelName, String brandName, String deviceId, Intent afterDataChange, Activity context){
+    public static void setBrandAndModel(String modelName, String brandName, final String deviceId, Intent afterDataChange, Activity context){
         final Intent finalChange = afterDataChange;
         final Activity finalContext = context;
         Firebase device = mRootRef.child("Device").child(deviceId);
@@ -202,6 +202,7 @@ public class Utils {
                                                             }
                                                         }
                                                     }));
+                                                    brandRef.child("Model").child(newModelId).child("devices").push().setValue(deviceId);
                                                     break findModelLoop;
                                                 }
                                             }
@@ -295,8 +296,6 @@ public class Utils {
         });
         Log.d("DeleteDevice", "Delete device completely");
         FirebaseCrash.log("Delete device completely");
-
-
     }
 
     public static void getDeviceData(String deviceId, final DataAdapter<Map<String, String>> dataAdapter){
@@ -344,5 +343,17 @@ public class Utils {
             }
         }
         return cleanedData;
+    }
+
+    public static String inputDefault(String data){
+        if(data == null){
+            return "";
+        }else{
+            return data;
+        }
+    }
+
+    public static void data(){
+        
     }
 }

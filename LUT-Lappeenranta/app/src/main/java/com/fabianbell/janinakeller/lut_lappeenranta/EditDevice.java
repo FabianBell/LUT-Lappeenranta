@@ -74,6 +74,7 @@ public class EditDevice extends AppCompatActivity {
     private EditText mDevicePrice;
     private EditText mDeviceShop;
     private DatePicker mDeviceDateOfPurchase;
+    private DatePicker mDeviceGuarantee;
     private Spinner mDeviceCondition;
 
     //adapter
@@ -153,6 +154,7 @@ public class EditDevice extends AppCompatActivity {
         mDeviceDateOfPurchase = findViewById(R.id.deviceDateOfPurchase);
         mDeviceCondition = findViewById(R.id.deviceCondition);
         mPickFromGalleryButton = findViewById(R.id.pickFromGalaryButton);
+        mDeviceGuarantee = findViewById(R.id.deviceGuarantee);
 
         brands = new ArrayList<>();
         brandAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, brands);
@@ -253,13 +255,14 @@ public class EditDevice extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //get lifetimeData
-                String brandName = Utils.removeSpace(mDeviceBrand.getText().toString());
-                String condition = mDeviceCondition.getSelectedItem().toString();
-                String date = mDeviceDateOfPurchase.getDayOfMonth() + "." + (mDeviceDateOfPurchase.getMonth() + 1)  + "." + mDeviceDateOfPurchase.getYear();
-                String deviceNumber = mDeviceIDNumber.getText().toString();
-                String modelName = Utils.removeSpace(mDeviceModel.getText().toString());
-                String price = mDevicePrice.getText().toString();
-                String shop = Utils.removeSpace(mDeviceShop.getText().toString());
+                String brandName = Utils.inputDefault(Utils.removeSpace(mDeviceBrand.getText().toString()));
+                String condition = Utils.inputDefault(mDeviceCondition.getSelectedItem().toString());
+                String date = Utils.inputDefault(mDeviceDateOfPurchase.getDayOfMonth() + "." + (mDeviceDateOfPurchase.getMonth() + 1)  + "." + mDeviceDateOfPurchase.getYear());
+                String deviceNumber = Utils.inputDefault(mDeviceIDNumber.getText().toString());
+                String modelName = Utils.inputDefault(Utils.removeSpace(mDeviceModel.getText().toString()));
+                String price = Utils.inputDefault(mDevicePrice.getText().toString());
+                String shop = Utils.inputDefault(Utils.removeSpace(mDeviceShop.getText().toString()));
+                String guarantee = Utils.inputDefault(mDeviceGuarantee.getDayOfMonth() + "." + (mDeviceGuarantee.getMonth() + 1)  + "." + mDeviceGuarantee.getYear());
 
                 Firebase device = mRootRef.child("Device").child(deviceId);
 
@@ -281,10 +284,15 @@ public class EditDevice extends AppCompatActivity {
                                     if (entry.getKey().equals("price") && !entry.getValue().equals(price)) {
                                         device.child("price").setValue(price);
                                     } else {
-                                        if (entry.getKey().equals("brandName") && !entry.getValue().equals(brandName)) {
-                                            Log.d("Save", "Brand changed > model changed as well");
-                                            FirebaseCrash.log("Brand changed > model changed as well");
-                                            modelChanged = true;
+                                        if (entry.getKey().equals("guarantee") && !entry.getValue().equals(guarantee)){
+                                            device.child("guarantee").setValue(guarantee);
+                                        }
+                                        else {
+                                            if (entry.getKey().equals("brandName") && !entry.getValue().equals(brandName)) {
+                                                Log.d("Save", "Brand changed > model changed as well");
+                                                FirebaseCrash.log("Brand changed > model changed as well");
+                                                modelChanged = true;
+                                            }
                                         }
                                     }
                                 }
@@ -524,7 +532,10 @@ public class EditDevice extends AppCompatActivity {
                                     mDevicePrice.setText(data.get("price"));
                                     mDeviceShop.setText(data.get("shop"));
                                     String[] date = data.get("date").split("\\.");
+                                    String[] guarantee = data.get("guarantee").split("\\.");
                                     mDeviceDateOfPurchase.updateDate(Integer.parseInt(date[2]), Integer.parseInt(date[1]) - 1, Integer.parseInt(date[0]));
+                                    mDeviceGuarantee.updateDate(Integer.parseInt(guarantee[2]), Integer.parseInt(guarantee[1]) - 1, Integer.parseInt(guarantee[0]));
+
                                     //get Conditions
                                     mRootRef.child("DeviceCondition").addChildEventListener(new SimpleChildListener() {
                                         @Override
@@ -563,8 +574,10 @@ public class EditDevice extends AppCompatActivity {
                             mDevicePrice.setText(data.get("price"));
                             mDeviceShop.setText(data.get("shop"));
                             String[] date = data.get("date").split("\\.");
+                            String[] guarantee = data.get("guarantee").split("\\.");
                             Log.d("debug", Integer.parseInt(date[2]) + "," + Integer.parseInt(date[1]) + "," + Integer.parseInt(date[0]));
                             mDeviceDateOfPurchase.updateDate(Integer.parseInt(date[2]), Integer.parseInt(date[1]) - 1, Integer.parseInt(date[0]));
+                            mDeviceGuarantee.updateDate(Integer.parseInt(guarantee[2]), Integer.parseInt(guarantee[1]) - 1, Integer.parseInt(guarantee[0]));
 
                             //get Conditions
                             mRootRef.child("DeviceCondition").addChildEventListener(new SimpleChildListener() {

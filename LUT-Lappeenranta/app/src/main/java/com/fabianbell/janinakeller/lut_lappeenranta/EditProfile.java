@@ -184,18 +184,19 @@ public class EditProfile extends AppCompatActivity {
                         public void onFailure(@NonNull Exception e) {
                             Log.d("Profile", "Cannot delete user from authentication system: " + e.getMessage());
                             FirebaseCrash.report(e);
+                            Toast.makeText(EditProfile.this, "We cannot delte your profile. Please contact an admin ... we are sorry", Toast.LENGTH_LONG).show();
                         }
                     }).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
                             Log.d("Profile", "User is deleted completely");
                             FirebaseCrash.log("User is deleted completely");
+                            //return to login
+                            startActivity(new Intent(EditProfile.this, LogIn.class));
                         }
                     });
                 }
             });
-            //return to login
-            startActivity(new Intent(EditProfile.this, LogIn.class));
         }
     }
     @Override
