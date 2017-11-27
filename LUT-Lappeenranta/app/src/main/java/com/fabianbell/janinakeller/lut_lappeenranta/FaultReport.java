@@ -17,7 +17,6 @@ import android.widget.Toast;
 import com.fabianbell.janinakeller.lut_lappeenranta.listener.BetterDay;
 import com.fabianbell.janinakeller.lut_lappeenranta.listener.DataAdapter;
 import com.fabianbell.janinakeller.lut_lappeenranta.listener.SimpleChildListener;
-import com.fabianbell.janinakeller.lut_lappeenranta.listener.SimpleValueListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.google.firebase.auth.FirebaseAuth;
@@ -37,8 +36,9 @@ public class FaultReport extends AppCompatActivity {
     private TextView mFaultReportDevice;
     private EditText mFaultReportBrokenPartsEditText;
     private EditText mFaultReportReasonEditText;
-    private EditText mFaultReportGarantyEditText;
+    private EditText mFaultReportGuaranteeEditText;
     private DatePicker mDayOfFault;
+    private TextView mFaultReportQuestion3;
 
     //Button
     private Button mFaultReportSaveButton;
@@ -78,11 +78,12 @@ public class FaultReport extends AppCompatActivity {
         mFaultReportDevice = findViewById(R.id.faultReportDevice);
         mFaultReportBrokenPartsEditText = findViewById(R.id.faultReportBrokenPartsEditText);
         mFaultReportReasonEditText = findViewById(R.id.faultReportReasonEditText);
-        mFaultReportGarantyEditText = findViewById(R.id.faultReportGarantyEditText);
+        mFaultReportGuaranteeEditText = findViewById(R.id.faultReportGarantyEditText);
         mFaultReportSaveButton = findViewById(R.id.faultReportSaveButton);
         mFaultReportSaveAndDeleteButton = findViewById(R.id.faultReportSaveAndDeleteButton);
         mDayOfFault = findViewById(R.id.deviceDateOfFault);
         mCondition = findViewById(R.id.condition);
+        mFaultReportQuestion3 = findViewById(R.id.faultReportQuestion3);
 
         conditions = new ArrayList<>();
         conditionsAdapter = new ArrayAdapter<String>(FaultReport.this, android.R.layout.simple_spinner_dropdown_item, conditions);
@@ -141,7 +142,7 @@ public class FaultReport extends AppCompatActivity {
     private String saveFaultReport() {
         String brokenParts = mFaultReportBrokenPartsEditText.getText().toString();
         String reason = mFaultReportReasonEditText.getText().toString();
-        String guaranty = mFaultReportGarantyEditText.getText().toString();
+        String guaranty = mFaultReportGuaranteeEditText.getText().toString();
         String reportId = mRootRef.child("FaultReport").child(deviceData.get("modelId")).push().getKey();
         //calculate lifeTime
         BetterDay dateOfPurchase = BetterDay.parse(deviceData.get("date"));
@@ -156,8 +157,16 @@ public class FaultReport extends AppCompatActivity {
             Firebase reportRef = mRootRef.child("FaultReport").child(deviceData.get("modelId")).child(reportId);
             reportRef.child("BrokenParts").setValue(brokenParts);
             reportRef.child("Reason").setValue(reason);
-            reportRef.child("Garanty").setValue(guaranty);
+            reportRef.child("guarantee").setValue(guaranty);
             reportRef.child("Lifetime").setValue(lifetime);
+            //calculate guarantee
+            Calendar currentDate = Calendar.getInstance();
+            BetterDay guaranteeDate = BetterDay.parse(deviceData.get("guarantee"));
+            if (dateOfFault.before(guaranteeDate)){
+                reportRef.child("guarantee").setValue("true");
+            }else{
+                reportRef.child("guarantee").setValue("false");
+            }
             Log.d("Save", "Saved FaultReport");
             FirebaseCrash.log("Saved FaultReport");
             return reportId;

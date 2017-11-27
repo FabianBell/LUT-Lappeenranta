@@ -44,7 +44,6 @@ public class LogIn extends AppCompatActivity implements GoogleApiClient.OnConnec
     private Button mLogiInButton;
 
     private TextView mSignUpLink;
-    private TextView mForgotPasswordField;
 
     private static final String TAG = "SignInActivity";
 
@@ -65,7 +64,7 @@ public class LogIn extends AppCompatActivity implements GoogleApiClient.OnConnec
         if (changedEmail != null){
             //changed Email
             Toast.makeText(LogIn.this, "Please log in again", Toast.LENGTH_LONG).show();
-            Log.d("resaon", "Changed email adress");
+            Log.d("reason", "Changed email adress");
             FirebaseCrash.log("Changed email adress");
         }
 
@@ -78,10 +77,7 @@ public class LogIn extends AppCompatActivity implements GoogleApiClient.OnConnec
                     //debug
                     //todo remove debug login
                     if (firebaseAuth.getCurrentUser().isEmailVerified()) {
-                            startActivity(new Intent(LogIn.this, Main.class));
-                        } else {
-                        Log.d("EmailVerification", "User: " + firebaseAuth.getCurrentUser().getEmail());
-                        Toast.makeText(LogIn.this, "Your email is not verified. Pleas verifiy your email.", Toast.LENGTH_LONG).show();
+                        startActivity(new Intent(LogIn.this, Main.class));
                     }
                 }
             }
@@ -91,8 +87,6 @@ public class LogIn extends AppCompatActivity implements GoogleApiClient.OnConnec
         mPasswordField = (EditText) findViewById(R.id.passwordField);
 
         mLogiInButton = (Button) findViewById(R.id.logiInButton);
-
-        mForgotPasswordField = findViewById(R.id.forgotPasswordField);
 
         mLogiInButton.setOnClickListener(new View.OnClickListener() {
             @Override

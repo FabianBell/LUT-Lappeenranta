@@ -91,6 +91,29 @@
                         android:datePickerMode="spinner" />
                 </LinearLayout>
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Expiry Date of Guarantee"
+                        android:textAlignment="center"
+                        android:textSize="18sp" />
+
+                    <DatePicker
+                        android:id="@+id/deviceGuarantee"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:calendarViewShown="false"
+                        android:datePickerMode="spinner" />
+                </LinearLayout>
+
                 <Spinner
                     android:id="@+id/deviceCondition"
                     android:layout_width="match_parent"
@@ -111,6 +134,13 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Add Receipt/ Change Reciept" />
+
+                <Button
+                    android:id="@+id/pickFromGalaryButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="ADD/Change FROM GALLERY" />
 
             </LinearLayout>
 

@@ -83,6 +83,14 @@
                                     android:layout_height="wrap_content"
                                     android:backgroundTint="@color/colorPrimary"
                                     android:text="@string/search" />
+
+                                <Button
+                                    android:id="@+id/statisticsLogOutButton"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="10dp"
+                                    android:backgroundTint="@color/colorPrimary"
+                                    android:text="LOG OUT" />
                             </LinearLayout>
 
                         </LinearLayout>
