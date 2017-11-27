@@ -77,7 +77,7 @@ public class DeviceDetail extends AppCompatActivity {
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mRefRoot = new Firebase("https://lut-lappeenranta.firebaseio.com/");
+        mRefRoot = Utils.mRootRef;
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
         deviceId = getIntent().getStringExtra("DeviceId");

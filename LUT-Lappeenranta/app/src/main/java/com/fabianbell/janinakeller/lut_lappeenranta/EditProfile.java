@@ -59,7 +59,7 @@ public class EditProfile extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 
-        mRootRef = new Firebase("https://lut-lappeenranta.firebaseio.com/");
+        mRootRef = Utils.mRootRef;
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
 

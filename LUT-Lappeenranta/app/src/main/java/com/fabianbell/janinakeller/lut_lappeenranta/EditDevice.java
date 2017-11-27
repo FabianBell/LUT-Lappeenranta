@@ -138,7 +138,7 @@ public class EditDevice extends AppCompatActivity {
             }
         }
 
-        mRootRef = new Firebase("https://lut-lappeenranta.firebaseio.com/");
+        mRootRef = Utils.mRootRef;
         mAuth = FirebaseAuth.getInstance();
         FirebaseStorage storage = FirebaseStorage.getInstance();
         storageReference = storage.getReference().child("User_receipt");
