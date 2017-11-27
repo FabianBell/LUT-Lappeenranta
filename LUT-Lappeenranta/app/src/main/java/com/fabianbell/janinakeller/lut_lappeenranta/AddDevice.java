@@ -125,7 +125,7 @@ public class AddDevice extends AppCompatActivity {
         Button mAddDeviceButton = findViewById(R.id.addDeviceButton);
         Button mPickFromGalaryButton = findViewById(R.id.pickFromGalaryButton);
 
-        mRootRef = new Firebase("https://lut-lappeenranta.firebaseio.com/");
+        mRootRef = Utils.mRootRef;
         mAuth = FirebaseAuth.getInstance();
         FirebaseStorage storage = FirebaseStorage.getInstance();
         storageReference = storage.getReference().child("User_receipt");

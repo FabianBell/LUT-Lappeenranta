@@ -57,7 +57,7 @@ public class Statistics extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_statistics);
 
-        mRootRef = new Firebase("https://lut-lappeenranta.firebaseio.com/");
+        mRootRef = Utils.mRootRef;
         mAuth = FirebaseAuth.getInstance();
 
         mStatisticsBarChart = findViewById(R.id.statisticBarChart);

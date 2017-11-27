@@ -29,7 +29,7 @@ import java.util.Map;
 
 public class Utils {
 
-    private static Firebase mRootRef = new Firebase("https://lut-lappeenranta.firebaseio.com/");
+    public static Firebase mRootRef = new Firebase("https://brandxtation-a0ba8.firebaseio.com/");
 
     public static Bitmap rotateBitmap(Bitmap bitmap, int orientation) {
 
@@ -202,7 +202,7 @@ public class Utils {
                                                             }
                                                         }
                                                     }));
-                                                    brandRef.child("Model").child(newModelId).child("devices").push().setValue(deviceId);
+                                                    brandRef.child("Model").child(newModelId).child("devices").child(deviceId).setValue("deviceId");
                                                     break findModelLoop;
                                                 }
                                             }
@@ -217,6 +217,7 @@ public class Utils {
                                         Firebase usage = modelRef.child("usage");
                                         //set usage to 1
                                         usage.setValue("1");
+                                        brandRef.child("Model").child(newModelId).child("devices").child(deviceId).setValue("deviceId");
                                     }
                                     modelRef.child("Name").setValue(param.get(2));
                                     Log.d("Device", "added unknown model to database");
@@ -268,12 +269,18 @@ public class Utils {
     }
 
     public static void deleteDevice(String deviceId, String userId) {
-        final Firebase mRootRef = new Firebase("https://lut-lappeenranta.firebaseio.com/");
         final StorageReference storage = FirebaseStorage.getInstance().getReference().child("User_receipt");
         final Firebase userDeviceRef = mRootRef.child("User").child(userId).child("Devices").child(deviceId);
         Log.d("DeleteDevice", "start deleting device");
         FirebaseCrash.log("start deleting device");
-        mRootRef.child("Device").child(deviceId).setValue(null);
+        mRootRef.child("Device").child(deviceId).addListenerForSingleValueEvent(new CallableValueEventListener<>(deviceId, new CallableForFirebase<String>() {
+            @Override
+            public void call(String param, DataSnapshot data) {
+                Map<String, String> deviceData = data.getValue(Map.class);
+                mRootRef.child("UnknownBrand_Model").child("Brand").child(deviceData.get("brandName")).child("Model").child(deviceData.get("modelName")).child("devices").child(param).setValue(null);
+                mRootRef.child("Device").child(param).setValue(null);
+            }
+        }));
         userDeviceRef.setValue(null);
         //check for receipt
         storage.child(userId + "_" + deviceId + ".jpg").delete().addOnFailureListener(new OnFailureListener() {
@@ -354,6 +361,6 @@ public class Utils {
     }
 
     public static void data(){
-        
+        //mRootRef.child("Brand").child("Samsung").child("Model").push().setValue("Galaxy S8+");
     }
 }

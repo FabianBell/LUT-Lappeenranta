@@ -72,7 +72,7 @@ public class FaultReport extends AppCompatActivity {
             deviceId = getIntent().getStringExtra("deviceId");
         }
 
-        mRootRef = new Firebase("https://lut-lappeenranta.firebaseio.com/");
+        mRootRef = Utils.mRootRef;
         mAuth = FirebaseAuth.getInstance();
 
         mFaultReportDevice = findViewById(R.id.faultReportDevice);
