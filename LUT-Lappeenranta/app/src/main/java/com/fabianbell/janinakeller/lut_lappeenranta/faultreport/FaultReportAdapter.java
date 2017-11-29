@@ -34,7 +34,11 @@ public class FaultReportAdapter extends ArrayAdapter<FaultReport> {
         ((TextView) view.findViewById(R.id.brokenParts)).setText(item.getBrokenParts());
         ((TextView) view.findViewById(R.id.lifetime)).setText(item.getLifetime());
         ((TextView) view.findViewById(R.id.reason)).setText(item.getReason());
-        ((TextView) view.findViewById(R.id.guarentee)).setText(item.getGuarantee());
+        if (item.getGuarantee().equals("true")){
+            ((TextView) view.findViewById(R.id.guarentee)).setText("Yes");
+        }else{
+            ((TextView) view.findViewById(R.id.guarentee)).setText("Yes");
+        }
         return view;
     }
 }
