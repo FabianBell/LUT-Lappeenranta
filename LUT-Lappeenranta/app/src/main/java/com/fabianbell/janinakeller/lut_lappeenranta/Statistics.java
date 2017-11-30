@@ -1,8 +1,11 @@
 package com.fabianbell.janinakeller.lut_lappeenranta;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.MotionEvent;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,7 +26,9 @@ import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.formatter.DefaultValueFormatter;
 import com.github.mikephil.charting.formatter.IValueFormatter;
+import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.github.mikephil.charting.renderer.XAxisRenderer;
 import com.github.mikephil.charting.utils.ViewPortHandler;
 import com.google.firebase.auth.FirebaseAuth;
@@ -93,7 +98,7 @@ public class Statistics extends AppCompatActivity {
                 String model = "";
                 ArrayList<String> brands = new ArrayList<>();
                 String brand = "";
-                ArrayList<BarEntry> barEntries = new ArrayList<>();
+                final ArrayList<BarEntry> barEntries = new ArrayList<>();
                 BarEntry barEntry;
                 float i = 0.5f;
                 for (Map.Entry<String, Integer> entry : lifetimeData.entrySet()) {
@@ -124,7 +129,37 @@ public class Statistics extends AppCompatActivity {
                 });
                 BarData barData = new BarData(iBarDataSet);
                 mStatisticsBarChart.setData(barData);
-                mStatisticsBarChart.callOnClick();
+                mStatisticsBarChart.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        return false;
+                    }
+                });
+                mStatisticsBarChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
+                    @Override
+                    public void onValueSelected(Entry e, Highlight h) {
+                        float x = e.getX();
+                        for(BarEntry barEntry : barEntries){
+                            if(x == barEntry.getX()){
+                                String modelName = (String) barEntry.getData();
+                                String modelId = "";
+                                for(Map.Entry<String, String> entry : modelIdMap.entrySet()){
+                                    if(entry.getValue().equals(modelName)){
+                                       modelId = entry.getKey();
+                                    }
+                                }
+                                Intent reportIntent = new Intent(Statistics.this, StatisticFaultReports.class);
+                                reportIntent.putExtra("MODEL", modelId);
+                                startActivity(reportIntent);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onNothingSelected() {
+
+                    }
+                });
             }
         });
         for (String modelId : modelData){
